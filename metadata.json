@@ -1,0 +1,7 @@
+{
+  "name": "FoodLens - Análisis y Escáner de Alimentos",
+  "description": "Escanea alimentos, comprende su calidad nutricional, ingredientes, procesamiento y aditivos sin alarmismos y compáralos con mejores alternativas.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
