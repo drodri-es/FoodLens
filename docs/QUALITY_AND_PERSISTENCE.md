@@ -1,0 +1,56 @@
+# Persistencia, pruebas y CI
+
+**Estado:** base implementada  
+**Última revisión:** 24 de septiembre de 2026
+
+## Persistencia local
+
+El modo invitado utiliza almacenamiento local versionado bajo
+`foodlens:app-state`. Se guardan:
+
+- historial de productos demo mediante identificadores;
+- historial de productos reales normalizados;
+- favoritos y listas;
+- cesta y cantidades;
+- selección de comparación;
+- objetivos y preferencias;
+- estado de la cuenta simulada.
+
+Los productos demo se reconstruyen contra el catálogo actual para no conservar
+copias obsoletas. Los identificadores que ya no existen se descartan.
+
+La caché de Open Food Facts utiliza claves `foodlens:product-cache:<barcode>` y
+caduca a los 30 minutos. Una caché llena, corrupta o no disponible no impide
+consultar el producto por red.
+
+No se almacenan tokens, credenciales ni imágenes capturadas por la cámara.
+
+## Pruebas
+
+El comando `npm test` utiliza el runner nativo de Node y `tsx`. Cubre:
+
+- normalización y conservación de valores ausentes;
+- extracción de códigos y GS1 Digital Link;
+- producto encontrado, no encontrado e indisponibilidad;
+- reutilización de la caché persistente;
+- serialización, restauración, versión desconocida y datos corruptos.
+
+Las pruebas no realizan llamadas reales a servicios externos.
+
+## Integración continua
+
+`.github/workflows/ci.yml` se ejecuta en pushes a `main` y pull requests. Realiza:
+
+1. `npm ci`;
+2. comprobación TypeScript;
+3. pruebas unitarias;
+4. build de producción;
+5. auditoría de dependencias de producción con severidad alta o crítica.
+
+## Limitaciones pendientes
+
+- La persistencia sigue siendo local al navegador; no hay sincronización entre
+  dispositivos ni backend de usuario.
+- Todavía no hay pruebas de componentes, accesibilidad o navegador real.
+- Cámara y linterna requieren validación manual en dispositivos físicos HTTPS.
+- La pipeline verifica el código, pero no despliega la aplicación.

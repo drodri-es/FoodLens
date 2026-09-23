@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
-import { DemoDataNotice } from '../ui/DataOrigin';
+import { DataOriginBadge, DemoDataNotice } from '../ui/DataOrigin';
 import { 
   Scan, 
   Scale, 
@@ -19,6 +19,8 @@ export const HomeView: React.FC = () => {
   const { 
     openScanner, 
     history, 
+    externalHistory,
+    openExternalProduct,
     openProductById, 
     setActiveTab, 
     openCompareModal,
@@ -89,6 +91,38 @@ export const HomeView: React.FC = () => {
       </header>
 
       <div className="px-4 pt-5 space-y-5 max-w-md mx-auto">
+        {externalHistory.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between px-1 mb-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Tus escaneos reales</h3>
+              <DataOriginBadge kind="source" label="Open Food Facts" />
+            </div>
+            <div className="space-y-2.5">
+              {externalHistory.slice(0, 4).map(item => (
+                <button
+                  key={item.product.barcode}
+                  onClick={() => openExternalProduct(item.product)}
+                  className="w-full bg-white rounded-3xl p-3.5 border border-blue-200 shadow-xs flex items-center gap-3 text-left"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-stone-50 border border-stone-200/50 p-1 flex items-center justify-center shrink-0">
+                    {item.product.imageUrl ? (
+                      <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Scan className="w-5 h-5 text-stone-400" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {item.scannedAt}</span>
+                    <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
+                    <span className="text-[10px] text-stone-500">Sin puntuación FoodLens</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-stone-400" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         <DemoDataNotice />
 
         {/* 2. Quick Access Row */}

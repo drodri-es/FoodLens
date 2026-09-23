@@ -9,7 +9,8 @@ import {
 } from '../types/foodlens';
 import { MOCK_PRODUCTS } from '../data/mockProducts';
 import { productRepository } from '../data/products/ProductRepository';
-import { FoodLensProduct } from '../domain/product/FoodLensProduct';
+import { ExternalHistoryItem, FoodLensProduct } from '../domain/product/FoodLensProduct';
+import { loadAppState, saveAppState } from '../data/persistence/appStateStorage';
 
 interface FoodLensContextType {
   activeTab: 'home' | 'explore' | 'scan' | 'basket' | 'profile';
@@ -33,6 +34,8 @@ interface FoodLensContextType {
   
   // History
   history: HistoryItem[];
+  externalHistory: ExternalHistoryItem[];
+  openExternalProduct: (product: FoodLensProduct) => void;
   addToHistory: (product: Product) => void;
   removeFromHistory: (productId: string) => void;
   clearHistory: () => void;
@@ -105,6 +108,7 @@ interface FoodLensContextType {
 const FoodLensContext = createContext<FoodLensContextType | undefined>(undefined);
 
 export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [persistedState] = useState(() => loadAppState(undefined, MOCK_PRODUCTS));
   const [activeTab, setActiveTab] = useState<'home' | 'explore' | 'scan' | 'basket' | 'profile'>('home');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [currentExternalProduct, setCurrentExternalProduct] = useState<FoodLensProduct | null>(null);
@@ -117,6 +121,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Initial state with defaults
   const [history, setHistory] = useState<HistoryItem[]>(() => {
+    if (persistedState.history) return persistedState.history;
     // Start with 3 sample scanned products to show recent scans immediately
     return [
       { product: MOCK_PRODUCTS[0], scannedAt: 'Hoy, 10:24' },
@@ -125,13 +130,14 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       { product: MOCK_PRODUCTS[5], scannedAt: '18 sep, 14:15' },
     ];
   });
+  const [externalHistory, setExternalHistory] = useState<ExternalHistoryItem[]>(persistedState.externalHistory ?? []);
 
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([
+  const [favorites, setFavorites] = useState<FavoriteItem[]>(persistedState.favorites ?? [
     { productId: MOCK_PRODUCTS[0].id, listId: 'desayuno', addedAt: 'Ayer' },
     { productId: MOCK_PRODUCTS[3].id, listId: 'habituales', addedAt: '19 sep' },
   ]);
 
-  const [favoriteLists, setFavoriteLists] = useState<Array<{ id: string; name: string }>>([
+  const [favoriteLists, setFavoriteLists] = useState<Array<{ id: string; name: string }>>(persistedState.favoriteLists ?? [
     { id: 'habituales', name: 'Habituales' },
     { id: 'desayuno', name: 'Desayuno' },
     { id: 'ninos', name: 'Niños' },
@@ -139,20 +145,20 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     { id: 'semanal', name: 'Compra semanal' },
   ]);
 
-  const [basket, setBasket] = useState<BasketItem[]>([
+  const [basket, setBasket] = useState<BasketItem[]>(persistedState.basket ?? [
     { product: MOCK_PRODUCTS[0], quantity: 1, addedAt: 'Hoy' }, // Cereales Choco Crunch (can be swapped!)
     { product: MOCK_PRODUCTS[3], quantity: 2, addedAt: 'Hoy' }, // Yogur Griego
     { product: MOCK_PRODUCTS[7], quantity: 1, addedAt: 'Ayer' }, // Pizza 4 quesos
   ]);
 
-  const [userGoals, setUserGoals] = useState<HealthGoal[]>([
+  const [userGoals, setUserGoals] = useState<HealthGoal[]>(persistedState.userGoals ?? [
     'reduce_sugar',
     'increase_fiber',
   ]);
 
-  const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreference[]>([]);
+  const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreference[]>(persistedState.dietaryPreferences ?? []);
 
-  const [comparisonProductIds, setComparisonProductIds] = useState<string[]>([
+  const [comparisonProductIds, setComparisonProductIds] = useState<string[]>(persistedState.comparisonProductIds ?? [
     MOCK_PRODUCTS[0].id,
     MOCK_PRODUCTS[1].id
   ]);
@@ -162,7 +168,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     email: string;
     isGuest: boolean;
     avatar?: string;
-  }>({
+  }>(persistedState.userAccount ?? {
     name: 'David Rodríguez',
     email: 'drodri@gmail.com',
     isGuest: false,
@@ -178,6 +184,30 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const [toast, setToast] = useState<{ message: string; type?: 'info' | 'success' | 'warning' } | null>(null);
+
+  useEffect(() => {
+    saveAppState({
+      history,
+      externalHistory,
+      favorites,
+      favoriteLists,
+      basket,
+      comparisonProductIds,
+      userGoals,
+      dietaryPreferences,
+      userAccount,
+    });
+  }, [
+    history,
+    externalHistory,
+    favorites,
+    favoriteLists,
+    basket,
+    comparisonProductIds,
+    userGoals,
+    dietaryPreferences,
+    userAccount,
+  ]);
 
   const showToast = (message: string, type: 'info' | 'success' | 'warning' = 'info') => {
     setToast({ message, type });
@@ -214,6 +244,11 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const openExternalProduct = (product: FoodLensProduct) => {
+    setCurrentProduct(null);
+    setCurrentExternalProduct(product);
+  };
+
   const openScanner = () => setIsScannerOpen(true);
   const closeScanner = () => setIsScannerOpen(false);
 
@@ -232,6 +267,10 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (result.status === 'found') {
       setCurrentProduct(null);
       setCurrentExternalProduct(result.product);
+      setExternalHistory(previous => [
+        { product: result.product, scannedAt: 'Ahora mismo' },
+        ...previous.filter(item => item.product.barcode !== result.product.barcode),
+      ].slice(0, 50));
       closeScanner();
       return { found: true, externalProduct: result.product };
     }
@@ -422,6 +461,8 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         closeScanner,
         scanBarcode,
         history,
+        externalHistory,
+        openExternalProduct,
         addToHistory,
         removeFromHistory,
         clearHistory,

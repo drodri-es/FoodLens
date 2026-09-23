@@ -16,6 +16,8 @@ la definición de producto marca la dirección de desarrollo.
   normalizado, responsabilidades y limitaciones actuales.
 - [Procedencia visual](./DATA_PROVENANCE.md): convención para distinguir datos
   externos, cálculos, estimaciones y contenido de demostración.
+- [Persistencia y calidad](./QUALITY_AND_PERSISTENCE.md): almacenamiento local,
+  pruebas automatizadas, CI y limitaciones pendientes.
 
 ## Regla de mantenimiento
 

@@ -33,6 +33,11 @@ export interface FoodLensProduct {
   source: FoodLensProductSource;
 }
 
+export interface ExternalHistoryItem {
+  product: FoodLensProduct;
+  scannedAt: string;
+}
+
 export type ProductLookupResult =
   | { status: 'found'; product: FoodLensProduct; fromCache: boolean }
   | { status: 'not-found'; barcode: string }
