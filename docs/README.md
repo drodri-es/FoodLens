@@ -12,6 +12,8 @@ la definición de producto marca la dirección de desarrollo.
   implementación. Es la guía principal para las decisiones futuras.
 - [Metodología de puntuación](./METHODOLOGY.md): estado actual del scoring,
   limitaciones del prototipo y modelo pendiente de implementación y validación.
+- [Capa de datos](./DATA_LAYER.md): integración con Open Food Facts, modelo
+  normalizado, responsabilidades y limitaciones actuales.
 
 ## Regla de mantenimiento
 

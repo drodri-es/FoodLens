@@ -8,11 +8,14 @@ import {
   HistoryItem 
 } from '../types/foodlens';
 import { MOCK_PRODUCTS } from '../data/mockProducts';
+import { productRepository } from '../data/products/ProductRepository';
+import { FoodLensProduct } from '../domain/product/FoodLensProduct';
 
 interface FoodLensContextType {
   activeTab: 'home' | 'explore' | 'scan' | 'basket' | 'profile';
   setActiveTab: (tab: 'home' | 'explore' | 'scan' | 'basket' | 'profile') => void;
   currentProduct: Product | null;
+  currentExternalProduct: FoodLensProduct | null;
   setCurrentProduct: (product: Product | null) => void;
   closeProductDetail: () => void;
   openProductById: (id: string) => void;
@@ -21,7 +24,12 @@ interface FoodLensContextType {
   isScannerOpen: boolean;
   openScanner: () => void;
   closeScanner: () => void;
-  scanBarcode: (code: string) => { found: boolean; product?: Product };
+  scanBarcode: (code: string) => Promise<{
+    found: boolean;
+    product?: Product;
+    externalProduct?: FoodLensProduct;
+    reason?: 'not-found' | 'invalid-code' | 'unavailable';
+  }>;
   
   // History
   history: HistoryItem[];
@@ -99,6 +107,7 @@ const FoodLensContext = createContext<FoodLensContextType | undefined>(undefined
 export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<'home' | 'explore' | 'scan' | 'basket' | 'profile'>('home');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [currentExternalProduct, setCurrentExternalProduct] = useState<FoodLensProduct | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [isComparingOpen, setIsComparingOpen] = useState<boolean>(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
@@ -199,6 +208,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const openProductById = (id: string) => {
     const p = MOCK_PRODUCTS.find(item => item.id === id);
     if (p) {
+      setCurrentExternalProduct(null);
       setCurrentProduct(p);
       addToHistory(p);
     }
@@ -207,16 +217,26 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const openScanner = () => setIsScannerOpen(true);
   const closeScanner = () => setIsScannerOpen(false);
 
-  const scanBarcode = (code: string) => {
+  const scanBarcode = async (code: string) => {
     const trimmed = code.trim();
     const found = MOCK_PRODUCTS.find(p => p.barcode === trimmed || p.id.includes(trimmed.toLowerCase()));
     if (found) {
+      setCurrentExternalProduct(null);
       setCurrentProduct(found);
       addToHistory(found);
       closeScanner();
       return { found: true, product: found };
     }
-    return { found: false };
+
+    const result = await productRepository.findByBarcode(trimmed);
+    if (result.status === 'found') {
+      setCurrentProduct(null);
+      setCurrentExternalProduct(result.product);
+      closeScanner();
+      return { found: true, externalProduct: result.product };
+    }
+
+    return { found: false, reason: result.status };
   };
 
   const addToHistory = (product: Product) => {
@@ -382,7 +402,10 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const openReportModal = () => setIsReportModalOpen(true);
   const closeReportModal = () => setIsReportModalOpen(false);
 
-  const closeProductDetail = () => setCurrentProduct(null);
+  const closeProductDetail = () => {
+    setCurrentProduct(null);
+    setCurrentExternalProduct(null);
+  };
 
   return (
     <FoodLensContext.Provider
@@ -390,6 +413,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         activeTab,
         setActiveTab,
         currentProduct,
+        currentExternalProduct,
         setCurrentProduct,
         closeProductDetail,
         openProductById,

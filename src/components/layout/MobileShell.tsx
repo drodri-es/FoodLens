@@ -12,12 +12,14 @@ import { OnboardingModal } from '../onboarding/OnboardingModal';
 import { ScoreMethodologyModal } from '../modals/ScoreMethodologyModal';
 import { ReportErrorModal } from '../modals/ReportErrorModal';
 import { FoodLensAssistantModal } from '../assistant/FoodLensAssistantModal';
+import { ExternalProductView } from '../product/ExternalProductView';
 import { CheckCircle, Info, AlertTriangle } from 'lucide-react';
 
 export const MobileShell: React.FC = () => {
   const { 
     activeTab, 
     currentProduct, 
+    currentExternalProduct,
     closeProductDetail, 
     toast 
   } = useFoodLens();
@@ -28,7 +30,12 @@ export const MobileShell: React.FC = () => {
       <main className="w-full max-w-md bg-stone-100 min-h-screen sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[40px] sm:shadow-2xl overflow-hidden relative flex flex-col border border-stone-300/40">
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto no-scrollbar relative">
-          {currentProduct ? (
+          {currentExternalProduct ? (
+            <ExternalProductView
+              product={currentExternalProduct}
+              onBack={closeProductDetail}
+            />
+          ) : currentProduct ? (
             <ProductDetailView 
               product={currentProduct} 
               onBack={closeProductDetail} 
@@ -44,7 +51,7 @@ export const MobileShell: React.FC = () => {
         </div>
 
         {/* Persistent Bottom Nav (shown unless product detail is open) */}
-        {!currentProduct && <BottomNav />}
+        {!currentProduct && !currentExternalProduct && <BottomNav />}
 
         {/* Global Floating Toast */}
         {toast && (

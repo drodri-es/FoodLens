@@ -136,11 +136,16 @@ export const ScannerView: React.FC = () => {
     triggerVibrate();
     setAnalyzing(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       analyzingRef.current = false;
       setAnalyzing(false);
-      const res = scanBarcode(code);
+      const res = await scanBarcode(code);
       if (!res.found) {
+        if (res.reason === 'unavailable') {
+          setHasPermission(false);
+          setScannerError('No se pudo consultar Open Food Facts. Comprueba tu conexión e inténtalo de nuevo.');
+          return;
+        }
         setMissingBarcode(code);
         setNotFoundFlow(true);
       }
@@ -364,7 +369,7 @@ export const ScannerView: React.FC = () => {
                   🥤 Refresco Cola Spark
                 </button>
                 <button
-                  onClick={() => handleBarcodeDetected('9999999999999')}
+                  onClick={() => handleBarcodeDetected('0000000000000')}
                   className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-left text-xs text-rose-300 transition-colors truncate"
                 >
                   ❓ Producto no existente
