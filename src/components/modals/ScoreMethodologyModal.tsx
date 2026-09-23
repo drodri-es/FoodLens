@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
-import { X, Activity, Apple, Flame, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { X, Activity, Apple, Flame, ShieldAlert, CheckCircle2, FlaskConical } from 'lucide-react';
 
 export const ScoreMethodologyModal: React.FC = () => {
   const { isScoreModalOpen, closeScoreModal } = useFoodLens();
@@ -16,7 +16,7 @@ export const ScoreMethodologyModal: React.FC = () => {
             <h2 className="text-base font-extrabold text-stone-900">
               Cómo funciona nuestra valoración
             </h2>
-            <span className="text-xs text-stone-500">Transparencia y rigor sin alarmismos</span>
+            <span className="text-xs text-stone-500">Metodología v0.1 · Prototipo</span>
           </div>
           <button
             onClick={closeScoreModal}
@@ -31,6 +31,13 @@ export const ScoreMethodologyModal: React.FC = () => {
           <p>
             En <strong>FoodLens</strong> creemos que la alimentación no puede reducirse a una simple nota binaria. Por eso analizamos cada alimento en <strong>cuatro dimensiones independientes</strong> antes de generar un score global orientativo:
           </p>
+
+          <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-start gap-2.5 text-violet-950">
+            <FlaskConical className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
+            <p>
+              <strong>Estado del prototipo:</strong> las puntuaciones que ves son datos de demostración cargados manualmente. Los pesos siguientes son el modelo propuesto y todavía no se aplican mediante un algoritmo validado.
+            </p>
+          </div>
 
           {/* Dimension 1 */}
           <div className="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-100 space-y-1">
@@ -72,7 +79,20 @@ export const ScoreMethodologyModal: React.FC = () => {
               4. Evaluación de Aditivos (Ponderación 15 %)
             </div>
             <p className="text-stone-600">
-              Cruzamos la lista con las evaluaciones oficiales de la EFSA y comités toxicológicos europeos. Distinguimos entre aditivos totalmente inocuos y aquellos en los que conviene moderar la exposición habitual.
+              La versión de producción deberá vincular cada valoración a una evaluación oficial identificable y fechada. Esa consulta automática todavía no está implementada.
+            </p>
+          </div>
+
+          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200 space-y-2">
+            <p className="font-bold text-stone-900">Escala visual propuesta</p>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+              <span><strong>80–100:</strong> Excelente</span>
+              <span><strong>60–79:</strong> Buena opción</span>
+              <span><strong>40–59:</strong> Mejorable</span>
+              <span><strong>0–39:</strong> Ocasional</span>
+            </div>
+            <p className="text-stone-500">
+              Estas etiquetas son orientativas y no determinan por sí solas si un alimento es adecuado para una persona.
             </p>
           </div>
 
@@ -88,6 +108,12 @@ export const ScoreMethodologyModal: React.FC = () => {
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <p>
                 <strong>Los datos del fabricante mandan:</strong> Las formulaciones de los productos cambian periódicamente. Comprueba siempre la información del envase físico.
+              </p>
+            </div>
+            <div className="flex items-start gap-2 text-stone-500">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <p>
+                <strong>Trazabilidad pendiente:</strong> la versión de producción mostrará la fuente, la fecha, los datos utilizados, la versión del algoritmo y cualquier información ausente.
               </p>
             </div>
           </div>
