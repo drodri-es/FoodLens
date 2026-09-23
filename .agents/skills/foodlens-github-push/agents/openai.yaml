@@ -1,0 +1,4 @@
+interface:
+  display_name: "FoodLens GitHub Push"
+  short_description: "Push FoodLens changes with the drodri-es GitHub account"
+  default_prompt: "Prepare and push the authorized FoodLens changes using the required GitHub account."
