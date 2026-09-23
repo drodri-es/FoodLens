@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
+import { DemoDataNotice } from '../ui/DataOrigin';
 import { 
   Scan, 
   Scale, 
@@ -88,6 +89,8 @@ export const HomeView: React.FC = () => {
       </header>
 
       <div className="px-4 pt-5 space-y-5 max-w-md mx-auto">
+        <DemoDataNotice />
+
         {/* 2. Quick Access Row */}
         <div>
           <div className="grid grid-cols-4 gap-2">

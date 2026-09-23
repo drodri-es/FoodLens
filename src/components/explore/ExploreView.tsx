@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { ScoreBadge, NutriScoreBadge, NovaBadge } from '../ui/ScoreBadges';
+import { DemoDataNotice } from '../ui/DataOrigin';
 import { 
   Search, 
   Filter, 
@@ -140,6 +141,10 @@ export const ExploreView: React.FC = () => {
           ))}
         </div>
       </header>
+
+      <div className="px-4 pt-4 max-w-md mx-auto">
+        <DemoDataNotice />
+      </div>
 
       {/* Product List Content */}
       <div className="p-4 max-w-md mx-auto space-y-3">

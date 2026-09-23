@@ -3,6 +3,7 @@ import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { BarcodeScanner, ScannerEngine } from '../../services/scanner/BarcodeScanner';
 import { createBarcodeScanner } from '../../services/scanner/createBarcodeScanner';
+import { DataOriginBadge } from '../ui/DataOrigin';
 import { 
   X, 
   Flashlight, 
@@ -182,7 +183,7 @@ export const ScannerView: React.FC = () => {
   };
 
   const completeContribution = () => {
-    showToast('¡Gracias! Revisaremos y añadiremos la información', 'success');
+    showToast('Demostración completada: no se ha enviado información', 'info');
     setNotFoundFlow(false);
     setContributeStep(1);
     setContributePhotos({});
@@ -435,6 +436,7 @@ export const ScannerView: React.FC = () => {
             <p className="text-xs text-stone-400 mb-6">
               Código <span className="font-mono text-stone-200">{missingBarcode}</span> no registrado aún. Puedes ayudarnos a identificarlo en menos de un minuto.
             </p>
+            <DataOriginBadge kind="demo" label="Aportación simulada · no se enviarán datos" className="mb-6" />
 
             {/* Step progress pills */}
             <div className="flex items-center gap-1.5 mb-6">
@@ -575,7 +577,7 @@ export const ScannerView: React.FC = () => {
                 onClick={completeContribution}
                 className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
               >
-                Enviar información
+                Simular envío
                 <CheckCircle2 className="w-4 h-4" />
               </button>
             )}

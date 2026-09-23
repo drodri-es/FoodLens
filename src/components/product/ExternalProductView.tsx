@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Database, Info, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
+import { DataOriginBadge } from '../ui/DataOrigin';
 
 interface ExternalProductViewProps {
   product: FoodLensProduct;
@@ -39,6 +40,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
 
       <main className="max-w-md mx-auto p-4 space-y-4">
         <section className="bg-white rounded-3xl border border-stone-200 p-5">
+          <DataOriginBadge kind="source" label="Open Food Facts" className="mb-3" />
           {product.imageUrl && (
             <img
               src={product.imageUrl}
@@ -84,6 +86,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
           ) : (
             <p className="text-xs text-stone-500">La fuente no proporciona una tabla nutricional.</p>
           )}
+          <div className="mt-4"><DataOriginBadge kind="source" /></div>
         </section>
 
         <section className="bg-white rounded-3xl border border-stone-200 p-5 space-y-4">
@@ -111,7 +114,10 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
             Procedencia de los datos
           </div>
           <p>Fuente: {product.source.provider}</p>
-          <p>Completitud del registro: {product.completeness} %</p>
+          <div className="flex items-center justify-between gap-2">
+            <p>Completitud del registro: {product.completeness} %</p>
+            <DataOriginBadge kind="calculated" label="Cálculo estructural" />
+          </div>
           {product.missingFields.length > 0 && <p>Información ausente: {product.missingFields.join(', ')}.</p>}
           {product.source.updatedAt && (
             <p>Actualizado en origen: {new Date(product.source.updatedAt).toLocaleDateString('es-ES')}.</p>

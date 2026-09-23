@@ -14,6 +14,8 @@ la definición de producto marca la dirección de desarrollo.
   limitaciones del prototipo y modelo pendiente de implementación y validación.
 - [Capa de datos](./DATA_LAYER.md): integración con Open Food Facts, modelo
   normalizado, responsabilidades y limitaciones actuales.
+- [Procedencia visual](./DATA_PROVENANCE.md): convención para distinguir datos
+  externos, cálculos, estimaciones y contenido de demostración.
 
 ## Regla de mantenimiento
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
+import { DemoDataNotice } from '../ui/DataOrigin';
 import { 
   ShoppingBag, 
   Trash2, 
@@ -86,6 +87,8 @@ export const BasketView: React.FC = () => {
 
       {/* Sub-tab switcher */}
       <div className="p-4 max-w-md mx-auto">
+        <DemoDataNotice className="mb-4" />
+
         <div className="flex bg-stone-200/70 p-1 rounded-2xl mb-4">
           <button
             onClick={() => setActiveTabSub('basket')}

@@ -155,9 +155,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '12 septiembre 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -263,9 +263,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '18 agosto 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -405,9 +405,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '04 mayo 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -515,9 +515,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '29 julio 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -624,9 +624,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '10 agosto 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -745,9 +745,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '15 julio 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -841,9 +841,9 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     alternatives: [],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '01 septiembre 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -951,9 +951,9 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     alternatives: [],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '22 agosto 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -1081,9 +1081,9 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     ],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '14 junio 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -1190,9 +1190,9 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     alternatives: [],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '19 agosto 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   },
   {
@@ -1289,9 +1289,9 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     alternatives: [],
     transparency: {
-      source: 'Open Food Facts',
+      source: 'Datos ficticios de demostración',
       lastUpdated: '05 septiembre 2026',
-      verifiedByFoodLens: true
+      verifiedByFoodLens: false
     }
   }
 ];

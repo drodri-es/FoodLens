@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
+import { DataOriginBadge } from '../ui/DataOrigin';
 import { 
   X, 
   Send, 
@@ -35,7 +36,7 @@ export const FoodLensAssistantModal: React.FC = () => {
     {
       id: 'welcome',
       sender: 'assistant',
-      text: '¡Hola! Soy el asistente de FoodLens. Puedo responder dudas sobre la composición nutricional, aditivos o alternativas de los productos basándome estrictamente en datos contrastados.'
+      text: 'Esta es una demostración con respuestas predefinidas sobre productos ficticios. Todavía no consulta una IA ni fuentes externas.'
     }
   ]);
   const [inputText, setInputText] = useState<string>('');
@@ -54,7 +55,7 @@ export const FoodLensAssistantModal: React.FC = () => {
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
 
-    // Formulate factual response grounded in our structured database
+    // Demo-only responses grounded in the local fixture data.
     setTimeout(() => {
       let botResponse = '';
       let action: { label: string; productId: string } | undefined = undefined;
@@ -73,7 +74,7 @@ export const FoodLensAssistantModal: React.FC = () => {
       } else if (q.includes('nova') || q.includes('procesamiento')) {
         botResponse = 'La clasificación NOVA divide los alimentos del 1 (sin procesar) al 4 (ultraprocesados). Un alimento NOVA 4 contiene ingredientes o procesos industriales como extrusión o emulsionantes. En FoodLens explicamos que NOVA 4 no significa automáticamente dañino, pero conviene que la base de la dieta provenga de NOVA 1 y 2.';
       } else {
-        botResponse = 'FoodLens analiza cada producto en base a cuatro dimensiones: calidad nutricional (fibra, azúcares, sal), pureza de ingredientes, grado de procesamiento (NOVA) y evaluación toxicológica de aditivos según la EFSA europea.';
+        botResponse = 'En esta demostración, las fichas incluyen cuatro dimensiones simuladas: nutrición, ingredientes, procesamiento y aditivos. La metodología de producción todavía no está implementada ni validada.';
       }
 
       const botMsg: ChatMessage = {
@@ -99,6 +100,7 @@ export const FoodLensAssistantModal: React.FC = () => {
             <div>
               <h2 className="text-sm font-extrabold text-stone-900">Pregúntale a FoodLens</h2>
               <span className="text-[11px] text-stone-400">Respuestas basadas en datos nutricionales</span>
+              <div className="mt-1"><DataOriginBadge kind="demo" label="Respuestas simuladas" /></div>
             </div>
           </div>
           <button

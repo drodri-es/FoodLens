@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { HEALTH_GOALS, DIETARY_PREFERENCES } from '../../data/mockProducts';
 import { HealthGoal, DietaryPreference } from '../../types/foodlens';
+import { DemoDataNotice, DataOriginBadge } from '../ui/DataOrigin';
 import { 
   User, 
   Target, 
@@ -61,6 +62,8 @@ export const ProfileView: React.FC = () => {
       </header>
 
       <div className="p-4 max-w-md mx-auto space-y-4">
+        <DemoDataNotice />
+
         {/* 1. User Identity Card */}
         {activeSubView === 'main' && (
           <>
@@ -76,6 +79,7 @@ export const ProfileView: React.FC = () => {
                   <span className="text-xs text-stone-400 block">
                     {userAccount.isGuest ? 'Modo invitado' : userAccount.email}
                   </span>
+                  <DataOriginBadge kind="demo" label="Cuenta simulada" className="mt-1" />
                 </div>
               </div>
 

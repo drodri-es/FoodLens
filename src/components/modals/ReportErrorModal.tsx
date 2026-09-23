@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { X, Camera, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { DataOriginBadge } from '../ui/DataOrigin';
 
 const ERROR_FIELDS = [
   'Nombre',
@@ -33,7 +34,7 @@ export const ReportErrorModal: React.FC = () => {
     e.preventDefault();
     setSubmitted(true);
     setTimeout(() => {
-      showToast('Gracias. Revisaremos la información en menos de 24h', 'success');
+      showToast('Demostración completada: no se ha enviado información', 'info');
       setSubmitted(false);
       setSelectedFields([]);
       setComments('');
@@ -54,6 +55,7 @@ export const ReportErrorModal: React.FC = () => {
             <span className="text-xs text-stone-500 truncate block max-w-[240px]">
               {currentProduct?.name || 'Reportar producto'}
             </span>
+            <DataOriginBadge kind="demo" label="Formulario simulado" className="mt-1" />
           </div>
           <button
             onClick={closeReportModal}
@@ -69,7 +71,7 @@ export const ReportErrorModal: React.FC = () => {
             <CheckCircle2 className="w-12 h-12 text-emerald-600 mb-3 animate-bounce" />
             <h3 className="font-extrabold text-base text-stone-900 mb-1">¡Gracias por tu ayuda!</h3>
             <p className="text-xs text-stone-500 max-w-xs">
-              Nuestro equipo y la comunidad de Open Food Facts revisarán la etiqueta aportada.
+              Flujo de demostración completado. No se ha enviado información ni ninguna fotografía.
             </p>
           </div>
         ) : (
@@ -144,7 +146,7 @@ export const ReportErrorModal: React.FC = () => {
                 disabled={selectedFields.length === 0 && !comments && !hasPhoto}
                 className="w-full h-12 rounded-2xl bg-stone-900 hover:bg-stone-800 disabled:opacity-40 text-white font-bold text-xs transition-colors"
               >
-                Enviar reporte
+                Simular envío
               </button>
             </div>
           </form>

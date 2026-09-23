@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
+import { DemoDataNotice } from '../ui/DataOrigin';
 import { 
   X, 
   Plus, 
@@ -83,6 +84,8 @@ export const ComparisonView: React.FC = () => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <DemoDataNotice />
+
           {/* Empty state if fewer than 1 product */}
           {comparedProducts.length === 0 ? (
             <div className="text-center py-12 px-4">

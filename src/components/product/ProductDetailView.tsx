@@ -3,6 +3,7 @@ import { useFoodLens } from '../../context/FoodLensContext';
 import { Product, NovaLevel } from '../../types/foodlens';
 import { calculatePersonalFit } from '../../data/mockProducts';
 import { ScoreCircle } from '../ui/ScoreCircle';
+import { DataOriginBadge, DemoDataNotice } from '../ui/DataOrigin';
 import { ScoreBadge, NutriScoreBadge, NovaBadge, getScoreColor } from '../ui/ScoreBadges';
 import { 
   ArrowLeft, 
@@ -173,6 +174,8 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
       </div>
 
       <div className="px-4 pt-4 space-y-4 max-w-md mx-auto">
+        <DemoDataNotice />
+
         {/* 3. Personalized Fit Card ("Encaje contigo") */}
         {userGoals.length > 0 && (
           <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-3xl p-5 border border-emerald-200/70 shadow-sm">
@@ -740,12 +743,13 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
 
         {/* 12. Transparency & Report Error Footer */}
         <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/50 text-xs text-stone-500 space-y-2">
+          <DataOriginBadge kind="demo" label="Fixture de desarrollo" />
           <div className="flex items-center justify-between">
             <span>Fuente: <strong>{product.transparency.source}</strong></span>
             <span>Actualizado: {product.transparency.lastUpdated}</span>
           </div>
           <p className="text-[11px] text-stone-400 leading-relaxed">
-            FoodLens separa los datos originales de la etiqueta de la interpretación algorítmica.
+            La fuente, la fecha, el análisis y la verificación de esta ficha son simulados. No deben interpretarse como datos reales de Open Food Facts.
           </p>
           <button
             onClick={openReportModal}
