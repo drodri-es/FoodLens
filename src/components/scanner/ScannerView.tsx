@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
+import { BarcodeScanner, ScannerEngine } from '../../services/scanner/BarcodeScanner';
+import { createBarcodeScanner } from '../../services/scanner/createBarcodeScanner';
 import { 
   X, 
   Flashlight, 
@@ -21,6 +23,9 @@ export const ScannerView: React.FC = () => {
   
   // Camera permission state
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scannerEngine, setScannerEngine] = useState<ScannerEngine | null>(null);
+  const [scannerError, setScannerError] = useState<string>('');
+  const [isStartingCamera, setIsStartingCamera] = useState<boolean>(false);
   const [torchOn, setTorchOn] = useState<boolean>(false);
   const [analyzing, setAnalyzing] = useState<boolean>(false);
   const [manualCodeModal, setManualCodeModal] = useState<boolean>(false);
@@ -35,6 +40,9 @@ export const ScannerView: React.FC = () => {
   const [contributePhotos, setContributePhotos] = useState<{ [key: number]: boolean }>({});
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerRef = useRef<BarcodeScanner | null>(null);
+  const analyzingRef = useRef<boolean>(false);
+  const detectedHandlerRef = useRef<(code: string) => void>(() => undefined);
 
   // Play gentle beep using Web Audio API
   const playBeep = () => {
@@ -65,35 +73,71 @@ export const ScannerView: React.FC = () => {
     }
   };
 
-  // Request actual camera or simulate if running in iframe / non-https
+  const stopScanner = () => {
+    scannerRef.current?.stop();
+    scannerRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setTorchOn(false);
+  };
+
+  const handleCloseScanner = () => {
+    stopScanner();
+    closeScanner();
+  };
+
+  useEffect(() => {
+    if (!isScannerOpen) {
+      stopScanner();
+      setHasPermission(null);
+      setScannerError('');
+      setScannerEngine(null);
+    }
+
+    return () => {
+      if (!isScannerOpen) stopScanner();
+    };
+  }, [isScannerOpen]);
+
+  useEffect(() => () => stopScanner(), []);
+
+  // Start the native detector when possible and ZXing everywhere else.
   const requestCamera = async () => {
+    setScannerError('');
+    setIsStartingCamera(true);
+    setHasPermission(true);
+
     try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        }
-        setHasPermission(true);
-      } else {
-        setHasPermission(true); // Fallback to realistic video simulator
-      }
-    } catch (err) {
-      console.warn('Camera access fallback to simulated viewfinder:', err);
-      setHasPermission(true); // Graceful fallback
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      if (!videoRef.current) throw new Error('No se pudo preparar la vista de cámara.');
+
+      const scanner = await createBarcodeScanner();
+      scannerRef.current = scanner;
+      await scanner.start(videoRef.current, code => detectedHandlerRef.current(code));
+      setScannerEngine(scanner.engine);
+    } catch (error) {
+      stopScanner();
+      setHasPermission(false);
+      setScannerError(
+        error instanceof DOMException && error.name === 'NotAllowedError'
+          ? 'No se ha concedido permiso para usar la cámara.'
+          : 'No hemos podido iniciar la cámara en este dispositivo.',
+      );
+    } finally {
+      setIsStartingCamera(false);
     }
   };
 
   // Process barcode scan
   const handleBarcodeDetected = (code: string) => {
-    if (analyzing) return;
+    if (analyzingRef.current) return;
+    analyzingRef.current = true;
+    stopScanner();
     playBeep();
     triggerVibrate();
     setAnalyzing(true);
 
     setTimeout(() => {
+      analyzingRef.current = false;
       setAnalyzing(false);
       const res = scanBarcode(code);
       if (!res.found) {
@@ -101,6 +145,23 @@ export const ScannerView: React.FC = () => {
         setNotFoundFlow(true);
       }
     }, 700);
+  };
+
+  detectedHandlerRef.current = handleBarcodeDetected;
+
+  const toggleTorch = async () => {
+    const nextValue = !torchOn;
+    try {
+      const supported = await scannerRef.current?.setTorch(nextValue);
+      if (!supported) {
+        showToast('La linterna no está disponible en este dispositivo', 'warning');
+        return;
+      }
+      setTorchOn(nextValue);
+      showToast(nextValue ? 'Linterna encendida' : 'Linterna apagada');
+    } catch {
+      showToast('No se pudo cambiar el estado de la linterna', 'warning');
+    }
   };
 
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -112,9 +173,7 @@ export const ScannerView: React.FC = () => {
   };
 
   const handleSimulateGalleryUpload = () => {
-    // Pick the first mock product
-    showToast('Imagen cargada de la galería', 'info');
-    handleBarcodeDetected(MOCK_PRODUCTS[0].barcode);
+    showToast('La lectura desde galería estará disponible próximamente', 'info');
   };
 
   const completeContribution = () => {
@@ -122,7 +181,7 @@ export const ScannerView: React.FC = () => {
     setNotFoundFlow(false);
     setContributeStep(1);
     setContributePhotos({});
-    closeScanner();
+    handleCloseScanner();
   };
 
   if (!isScannerOpen) return null;
@@ -130,11 +189,11 @@ export const ScannerView: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col text-white animate-in fade-in duration-200">
       {/* 1. Camera Permission Request Screen */}
-      {hasPermission === null && (
+      {hasPermission === null && !notFoundFlow && (
         <div className="flex-1 flex flex-col justify-between p-6 max-w-md mx-auto w-full">
           <div className="flex justify-end pt-2">
             <button
-              onClick={closeScanner}
+              onClick={handleCloseScanner}
               className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-stone-700"
             >
               <X className="w-5 h-5" />
@@ -162,7 +221,6 @@ export const ScannerView: React.FC = () => {
 
             <button
               onClick={() => {
-                setHasPermission(true);
                 setManualCodeModal(true);
               }}
               className="w-full h-12 rounded-2xl bg-stone-900 border border-stone-800 text-stone-300 font-semibold text-sm hover:bg-stone-800 transition-colors"
@@ -174,6 +232,30 @@ export const ScannerView: React.FC = () => {
           <div className="text-center text-xs text-stone-500 pb-4">
             Total privacidad · Escaneo local de códigos
           </div>
+        </div>
+      )}
+
+      {/* Camera unavailable / permission denied */}
+      {hasPermission === false && !notFoundFlow && (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
+          <AlertCircle className="w-12 h-12 text-amber-400 mb-4" />
+          <h2 className="text-lg font-bold text-white mb-2">Cámara no disponible</h2>
+          <p className="text-sm text-stone-400 mb-6">{scannerError}</p>
+          <button
+            onClick={() => {
+              setHasPermission(null);
+              setScannerError('');
+            }}
+            className="w-full h-12 rounded-2xl bg-stone-800 text-white font-semibold text-sm mb-3"
+          >
+            Volver a intentar
+          </button>
+          <button
+            onClick={() => setManualCodeModal(true)}
+            className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm"
+          >
+            Introducir código manualmente
+          </button>
         </div>
       )}
 
@@ -195,7 +277,7 @@ export const ScannerView: React.FC = () => {
           {/* Top Bar Controls */}
           <div className="relative z-20 flex items-center justify-between px-5 pt-8 pb-4">
             <button
-              onClick={closeScanner}
+              onClick={handleCloseScanner}
               className="w-11 h-11 rounded-full bg-stone-900/80 backdrop-blur-md text-white flex items-center justify-center hover:bg-stone-800 border border-white/10"
               aria-label="Cerrar escáner"
             >
@@ -203,21 +285,23 @@ export const ScannerView: React.FC = () => {
             </button>
 
             <div className="px-3.5 py-1.5 rounded-full bg-stone-900/80 backdrop-blur-md border border-white/10 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-semibold text-stone-200">Escáner listo</span>
+              <span className={`w-2 h-2 rounded-full ${isStartingCamera ? 'bg-amber-400' : 'bg-emerald-400 animate-ping'}`} />
+              <span className="text-xs font-semibold text-stone-200">
+                {isStartingCamera
+                  ? 'Iniciando cámara…'
+                  : `Escáner listo · ${scannerEngine === 'native' ? 'Nativo' : 'ZXing'}`}
+              </span>
             </div>
 
             <button
-              onClick={() => {
-                setTorchOn(!torchOn);
-                showToast(torchOn ? 'Linterna apagada' : 'Linterna encendida');
-              }}
+              onClick={toggleTorch}
+              disabled={isStartingCamera}
               className={`w-11 h-11 rounded-full flex items-center justify-center border transition-colors ${
                 torchOn
                   ? 'bg-amber-400 text-stone-950 border-amber-300'
                   : 'bg-stone-900/80 backdrop-blur-md text-white border-white/10 hover:bg-stone-800'
               }`}
-              aria-label="Encender linterna"
+              aria-label={torchOn ? 'Apagar linterna' : 'Encender linterna'}
             >
               <Flashlight className="w-5 h-5" />
             </button>
@@ -255,8 +339,8 @@ export const ScannerView: React.FC = () => {
               Compatible con EAN, UPC, QR y GS1 Digital Link
             </span>
 
-            {/* Quick test barcodes (for instant testing without paper barcodes) */}
-            <div className="w-full max-w-sm mt-6 bg-stone-900/75 backdrop-blur-md rounded-2xl p-3 border border-white/10">
+            {/* Test controls are never included in production builds. */}
+            {import.meta.env.DEV && <div className="w-full max-w-sm mt-6 bg-stone-900/75 backdrop-blur-md rounded-2xl p-3 border border-white/10">
               <span className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider block mb-2 text-center">
                 Probar escaneo inmediato (Simulador)
               </span>
@@ -286,7 +370,7 @@ export const ScannerView: React.FC = () => {
                   ❓ Producto no existente
                 </button>
               </div>
-            </div>
+            </div>}
           </div>
 
           {/* Bottom Bar Options */}
@@ -313,9 +397,7 @@ export const ScannerView: React.FC = () => {
               </button>
 
               <button
-                onClick={() => {
-                  showToast('Modo QR activado');
-                }}
+                onClick={() => showToast('El lector detecta códigos QR automáticamente')}
                 className="flex flex-col items-center gap-1.5 text-stone-300 hover:text-white"
               >
                 <div className="w-12 h-12 rounded-2xl bg-stone-900/90 border border-white/10 flex items-center justify-center">
@@ -496,7 +578,7 @@ export const ScannerView: React.FC = () => {
             <button
               onClick={() => {
                 setNotFoundFlow(false);
-                closeScanner();
+                handleCloseScanner();
               }}
               className="w-full py-2.5 text-xs text-stone-400 hover:text-stone-200"
             >
