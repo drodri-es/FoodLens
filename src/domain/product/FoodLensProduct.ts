@@ -15,6 +15,12 @@ export interface FoodLensProductSource {
   fetchedAt: string;
 }
 
+export interface FoodLensSourceAssessment {
+  id: 'nutrition' | 'processing' | 'additives';
+  score: number;
+  title?: string;
+}
+
 export interface FoodLensProduct {
   barcode: string;
   name: string;
@@ -28,6 +34,7 @@ export interface FoodLensProduct {
   allergens: string[];
   nova?: 1 | 2 | 3 | 4;
   nutriScore?: 'a' | 'b' | 'c' | 'd' | 'e';
+  sourceAssessments: FoodLensSourceAssessment[];
   completeness: number;
   missingFields: string[];
   source: FoodLensProductSource;

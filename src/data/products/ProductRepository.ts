@@ -4,7 +4,7 @@ import { OpenFoodFactsClient } from '../openFoodFacts/OpenFoodFactsClient';
 import { normalizeOpenFoodFactsProduct } from '../openFoodFacts/normalizeOpenFoodFactsProduct';
 
 const CACHE_TTL_MS = 30 * 60 * 1000;
-const CACHE_PREFIX = 'foodlens:product-cache:';
+const CACHE_PREFIX = 'foodlens:product-cache:v2:';
 
 export function extractBarcode(input: string): string | null {
   const trimmed = input.trim();

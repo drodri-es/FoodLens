@@ -1,7 +1,10 @@
 import React from 'react';
 import { ArrowLeft, Database, Info, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
+import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { DataOriginBadge } from '../ui/DataOrigin';
+import { NovaBadge, NutriScoreBadge, ScoreBadge } from '../ui/ScoreBadges';
+import { NutriScoreGrade } from '../../types/foodlens';
 
 interface ExternalProductViewProps {
   product: FoodLensProduct;
@@ -21,6 +24,10 @@ const nutritionLabels: Array<[keyof FoodLensProduct['nutrition'], string, string
 
 export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ product, onBack }) => {
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
+  const score = calculateFoodLensScore(product);
+  const confidenceLabel = score && (score.confidence >= 70
+    ? 'alta'
+    : score.confidence >= 40 ? 'media' : 'baja');
 
   return (
     <div className="min-h-full bg-stone-100 pb-10 text-stone-900">
@@ -34,7 +41,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
         </button>
         <div>
           <h1 className="text-sm font-extrabold">Producto consultado</h1>
-          <span className="text-[11px] text-stone-500">Datos originales, sin valoración FoodLens</span>
+          <span className="text-[11px] text-stone-500">Datos reales y valoración experimental</span>
         </div>
       </header>
 
@@ -58,12 +65,60 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
           </p>
         </section>
 
-        <section className="bg-amber-50 rounded-2xl border border-amber-200 p-4 flex gap-3">
-          <TriangleAlert className="w-5 h-5 text-amber-700 shrink-0" />
-          <div className="text-xs text-amber-950 leading-relaxed">
-            <strong>No hay puntuación FoodLens.</strong> El motor de scoring todavía no está implementado y no se genera una nota a partir de estos datos.
+        <section className="bg-white rounded-3xl border border-stone-200 p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-bold text-sm">Referencias de la fuente</h3>
+            <DataOriginBadge kind="source" label="Open Food Facts" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {product.nutriScore
+              ? <NutriScoreBadge grade={product.nutriScore.toUpperCase() as NutriScoreGrade} />
+              : <span className="text-xs text-stone-500">Nutri-Score no disponible</span>}
+            {product.nova
+              ? <NovaBadge nova={product.nova} />
+              : <span className="text-xs text-stone-500">NOVA no disponible</span>}
           </div>
         </section>
+
+        {score ? (
+          <section className="bg-white rounded-3xl border border-violet-200 p-5 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-sm mb-1">FoodLens Score experimental</h3>
+                <p className="text-[11px] text-stone-500">Versión {score.algorithmVersion}</p>
+              </div>
+              <DataOriginBadge kind="calculated" />
+            </div>
+            <ScoreBadge score={score.overall} label={score.label} size="lg" />
+            <p className="text-xs text-stone-600">
+              Confianza {confidenceLabel}: {score.confidence} %. Se ponderan únicamente las dimensiones con valoración disponible.
+            </p>
+            <div className="space-y-3">
+              {score.dimensions.map(dimension => (
+                <div key={dimension.id} className="rounded-xl bg-stone-50 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold">{dimension.label} · {dimension.weight} %</span>
+                    <span className="text-xs font-bold tabular-nums">
+                      {dimension.score === undefined ? 'Sin evaluar' : `${dimension.score}/100`}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 mt-1">{dimension.explanation}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">
+              <TriangleAlert className="w-4 h-4 shrink-0" />
+              <span>Valoración orientativa, no validada clínicamente. No sustituye asesoramiento nutricional o médico.</span>
+            </div>
+          </section>
+        ) : (
+          <section className="bg-amber-50 rounded-2xl border border-amber-200 p-4 flex gap-3">
+            <TriangleAlert className="w-5 h-5 text-amber-700 shrink-0" />
+            <div className="text-xs text-amber-950 leading-relaxed">
+              <strong>No hay datos suficientes para calcular una valoración FoodLens.</strong> Se necesita una valoración nutricional y al menos otra dimensión conocida.
+            </div>
+          </section>
+        )}
 
         <section className="bg-white rounded-3xl border border-stone-200 p-5">
           <div className="flex items-center justify-between mb-4">

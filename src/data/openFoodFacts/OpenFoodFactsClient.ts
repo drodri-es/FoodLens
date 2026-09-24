@@ -18,6 +18,7 @@ const PRODUCT_FIELDS = [
   'allergens_tags',
   'nova_group',
   'nutriscore_grade',
+  'attribute_groups',
   'last_modified_t',
 ].join(',');
 
@@ -28,7 +29,7 @@ export class OpenFoodFactsClient {
   ) {}
 
   async getProduct(barcode: string, signal?: AbortSignal): Promise<OpenFoodFactsProductResponse> {
-    const url = `${this.baseUrl}/product/${encodeURIComponent(barcode)}.json?fields=${PRODUCT_FIELDS}`;
+    const url = `${this.baseUrl}/product/${encodeURIComponent(barcode)}.json?fields=${PRODUCT_FIELDS}&lc=es`;
     const response = await this.fetcher(url, {
       signal,
     });

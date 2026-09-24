@@ -47,6 +47,22 @@ export function normalizeOpenFoodFactsProduct(
     { label: 'Nutri-Score', complete: nutriScore !== undefined },
   ];
   const completed = completenessChecks.filter(item => item.complete).length;
+  const sourceAssessmentIds: ReadonlyMap<string, 'nutrition' | 'processing' | 'additives'> = new Map([
+    ['nutriscore', 'nutrition'],
+    ['nova', 'processing'],
+    ['additives', 'additives'],
+  ] as const);
+  const sourceAssessments = (payload.attribute_groups ?? [])
+    .flatMap(group => group.attributes ?? [])
+    .flatMap(attribute => {
+      const id = attribute.id ? sourceAssessmentIds.get(attribute.id) : undefined;
+      if (!id || attribute.status !== 'known' || !Number.isFinite(attribute.match)) return [];
+      return [{
+        id,
+        score: Math.round(Math.max(0, Math.min(100, attribute.match as number))),
+        title: attribute.title,
+      }];
+    });
 
   return {
     barcode: payload.code || fallbackBarcode,
@@ -61,6 +77,7 @@ export function normalizeOpenFoodFactsProduct(
     allergens: (payload.allergens_tags ?? []).map(localizedTag),
     nova,
     nutriScore,
+    sourceAssessments,
     completeness: Math.round((completed / completenessChecks.length) * 100),
     missingFields: completenessChecks.filter(item => !item.complete).map(item => item.label),
     source: {

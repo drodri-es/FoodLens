@@ -1,8 +1,8 @@
 # Metodología de puntuación de FoodLens
 
-**Versión del documento:** 0.1  
-**Estado:** prototipo; no validado para producción  
-**Última revisión:** 23 de septiembre de 2026
+**Versión del documento:** 0.2
+**Estado:** algoritmo experimental; no validado para producción
+**Última revisión:** 24 de septiembre de 2026
 
 ## Alcance actual
 
@@ -10,34 +10,42 @@ FoodLens muestra una puntuación global de 0 a 100, cuatro puntuaciones por
 dimensión y, cuando el usuario selecciona objetivos, una puntuación
 personalizada de «Encaje contigo».
 
-En el prototipo actual:
+El catálogo de demostración conserva puntuaciones manuales. Los productos
+consultados por código de barras utilizan, de forma separada, el algoritmo
+experimental `0.1.0-experimental`.
 
-- las puntuaciones globales y las cuatro puntuaciones por dimensión son datos
-  de demostración definidos manualmente en `src/data/mockProducts.ts`;
-- no existe todavía un algoritmo que derive esas puntuaciones de la tabla
-  nutricional, los ingredientes, NOVA o los aditivos;
-- los pesos 45/25/15/15 que aparecen en el diseño son una propuesta de producto,
-  no una fórmula ejecutada por la aplicación;
-- las fuentes y fechas asociadas a los productos son también datos del fixture:
-  el repositorio no contiene aún una integración que permita verificar su
-  procedencia.
+Este algoritmo no vuelve a calcular Nutri-Score, NOVA ni la valoración de
+aditivos. Consume los atributos normalizados que Open Food Facts publica con
+estado `known` y un valor `match` entre 0 y 100. De este modo la entrada conserva
+una procedencia identificable y FoodLens se limita a ponderarla.
 
-Por tanto, las notas actuales no deben presentarse como evaluaciones calculadas,
-validadas o independientes.
-
-## Modelo propuesto, pendiente de implementación y validación
+## Modelo experimental implementado
 
 La propuesta actual divide la evaluación en cuatro dimensiones:
 
 | Dimensión | Peso propuesto | Información considerada |
 | --- | ---: | --- |
 | Calidad nutricional | 45 % | Energía, azúcares, grasas saturadas, sal, fibra y proteína por 100 g o 100 ml |
-| Ingredientes | 25 % | Composición declarada, orden, proporciones disponibles y alérgenos |
+| Ingredientes | 25 % | Sin evaluar hasta disponer de reglas y fuentes validadas; los alérgenos nunca penalizan |
 | Procesamiento | 15 % | Clasificación NOVA y procesos declarados o inferibles con evidencia |
 | Aditivos | 15 % | Aditivos declarados y evaluación vinculada a una fuente identificable |
 
-Antes de convertir esta propuesta en una fórmula deben definirse, revisarse y
-probarse como mínimo:
+La puntuación global es la media ponderada de las dimensiones conocidas. Los
+pesos ausentes se excluyen del denominador; no se sustituyen por cero. Para
+mostrar el resultado son obligatorios nutrición y al menos otra dimensión, con
+un mínimo de 60 puntos de peso disponibles.
+
+La confianza se calcula así:
+
+```text
+confianza = completitud_del_registro × peso_disponible / 100
+```
+
+Por tanto, mientras ingredientes siga sin evaluar, la confianza máxima es 75 %.
+El resultado siempre se marca como cálculo experimental y muestra el desglose,
+la versión y las dimensiones ausentes.
+
+Antes de considerar el algoritmo apto para producción deben completarse:
 
 1. umbrales diferentes por categoría de alimento y para sólidos frente a
    bebidas;

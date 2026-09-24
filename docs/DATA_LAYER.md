@@ -36,8 +36,10 @@ sus nombres de campos. Solo reciben el modelo interno `FoodLensProduct`.
 
 Los productos obtenidos de Open Food Facts se muestran en una ficha factual
 independiente. La ficha identifica la fuente, los campos ausentes y la
-completitud. No calcula ni muestra una puntuación FoodLens porque el motor de
-scoring todavía no está implementado ni validado.
+completitud. También conserva las valoraciones normalizadas que Open Food Facts
+publica para Nutri-Score, NOVA y aditivos. El motor experimental puede utilizarlas
+como entradas trazables; no reinterpreta los alérgenos ni inventa valores para
+dimensiones ausentes.
 
 ## Limitaciones actuales
 

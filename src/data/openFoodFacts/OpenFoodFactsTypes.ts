@@ -9,6 +9,18 @@ export interface OpenFoodFactsNutriments {
   salt_100g?: number;
 }
 
+export interface OpenFoodFactsAttribute {
+  id?: string;
+  status?: 'known' | 'unknown' | 'not-applicable';
+  match?: number;
+  title?: string;
+  description_short?: string;
+}
+
+export interface OpenFoodFactsAttributeGroup {
+  attributes?: OpenFoodFactsAttribute[];
+}
+
 export interface OpenFoodFactsProductPayload {
   code?: string;
   product_name?: string;
@@ -25,6 +37,7 @@ export interface OpenFoodFactsProductPayload {
   allergens_tags?: string[];
   nova_group?: number;
   nutriscore_grade?: string;
+  attribute_groups?: OpenFoodFactsAttributeGroup[];
   last_modified_t?: number;
 }
 
