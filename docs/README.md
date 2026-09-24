@@ -24,6 +24,8 @@ la definición de producto marca la dirección de desarrollo.
   reglas neutrales para calcular diferencias.
 - [Historial de escaneos reales](./HISTORY.md): fechas, búsqueda, agrupación,
   reapertura, comparación y borrado local.
+- [PWA y modo sin conexión](./PWA_AND_OFFLINE.md): instalación, Service Worker,
+  cachés y recuperación segura de productos guardados.
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

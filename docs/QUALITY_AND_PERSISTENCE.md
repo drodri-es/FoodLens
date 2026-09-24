@@ -29,6 +29,11 @@ La caché de Open Food Facts utiliza claves `foodlens:product-cache:v2:<barcode>
 caduca a los 30 minutos. Una caché llena, corrupta o no disponible no impide
 consultar el producto por red.
 
+El Service Worker precarga la interfaz y permite abrir la aplicación sin
+conexión. Los productos del historial pueden consultarse offline, conservando la
+fecha original de Open Food Facts. Las respuestas de la API no se cachean en el
+Service Worker para evitar aparentar que datos antiguos son una consulta nueva.
+
 No se almacenan tokens, credenciales ni imágenes capturadas por la cámara.
 
 ## Pruebas
@@ -61,5 +66,5 @@ Las pruebas no realizan llamadas reales a servicios externos.
 - La persistencia sigue siendo local al navegador; no hay sincronización entre
   dispositivos ni backend de usuario.
 - Todavía no hay pruebas de componentes, accesibilidad o navegador real.
-- Cámara y linterna requieren validación manual en dispositivos físicos HTTPS.
+- Cámara, instalación PWA y linterna requieren validación manual en dispositivos físicos HTTPS.
 - El despliegue se valida mediante un workflow separado de GitHub Pages.

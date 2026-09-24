@@ -14,6 +14,7 @@ import { ReportErrorModal } from '../modals/ReportErrorModal';
 import { FoodLensAssistantModal } from '../assistant/FoodLensAssistantModal';
 import { ExternalProductView } from '../product/ExternalProductView';
 import { CheckCircle, Info, AlertTriangle } from 'lucide-react';
+import { NetworkStatus } from '../ui/NetworkStatus';
 
 export const MobileShell: React.FC = () => {
   const { 
@@ -31,6 +32,7 @@ export const MobileShell: React.FC = () => {
     <div className="min-h-screen bg-stone-200/60 flex items-center justify-center font-sans antialiased selection:bg-emerald-500 selection:text-white sm:py-6 sm:px-4">
       {/* Mobile container device wrapper */}
       <main className="w-full max-w-md bg-stone-100 min-h-screen sm:min-h-[844px] sm:max-h-[920px] sm:rounded-[40px] sm:shadow-2xl overflow-hidden relative flex flex-col border border-stone-300/40">
+        <NetworkStatus />
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto no-scrollbar relative">
           {currentExternalProduct ? (

@@ -8,7 +8,7 @@ import {
   HistoryItem 
 } from '../types/foodlens';
 import { MOCK_PRODUCTS } from '../data/mockProducts';
-import { productRepository } from '../data/products/ProductRepository';
+import { extractBarcode, productRepository } from '../data/products/ProductRepository';
 import { ExternalFavoriteItem, ExternalHistoryItem, FoodLensProduct } from '../domain/product/FoodLensProduct';
 import { loadAppState, saveAppState } from '../data/persistence/appStateStorage';
 
@@ -267,6 +267,25 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return { found: true, product: found };
     }
 
+    const normalizedBarcode = extractBarcode(trimmed);
+    const savedHistoryItem = normalizedBarcode
+      ? externalHistory.find(item => item.product.barcode === normalizedBarcode)
+      : undefined;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      if (savedHistoryItem) {
+        setCurrentProduct(null);
+        setCurrentExternalProduct(savedHistoryItem.product);
+        closeScanner();
+        showToast('Mostrando la información guardada en este dispositivo', 'info');
+        return { found: true, externalProduct: savedHistoryItem.product };
+      }
+      return {
+        found: false,
+        reason: 'unavailable' as const,
+        message: 'Sin conexión. Este producto no está en tu historial guardado.',
+      };
+    }
+
     const result = await productRepository.findByBarcode(trimmed);
     if (result.status === 'found') {
       if (externalComparisonProducts.length === 1) {
@@ -295,6 +314,14 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       ].slice(0, 50));
       closeScanner();
       return { found: true, externalProduct: result.product };
+    }
+
+    if (result.status === 'unavailable' && savedHistoryItem) {
+      setCurrentProduct(null);
+      setCurrentExternalProduct(savedHistoryItem.product);
+      closeScanner();
+      showToast('No se pudo actualizar; mostramos la información guardada', 'warning');
+      return { found: true, externalProduct: savedHistoryItem.product };
     }
 
     return {
