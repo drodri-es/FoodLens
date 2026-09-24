@@ -1,7 +1,7 @@
 # Persistencia, pruebas y CI
 
 **Estado:** base implementada  
-**Última revisión:** 24 de septiembre de 2026
+**Última revisión:** 25 de septiembre de 2026
 
 ## Persistencia local
 
@@ -10,6 +10,7 @@ El modo invitado utiliza almacenamiento local versionado bajo
 
 - historial de productos demo mediante identificadores;
 - historial de productos reales normalizados;
+- favoritos de productos reales normalizados;
 - favoritos y listas;
 - cesta y cantidades;
 - selección de comparación;
@@ -19,7 +20,7 @@ El modo invitado utiliza almacenamiento local versionado bajo
 Los productos demo se reconstruyen contra el catálogo actual para no conservar
 copias obsoletas. Los identificadores que ya no existen se descartan.
 
-La caché de Open Food Facts utiliza claves `foodlens:product-cache:<barcode>` y
+La caché de Open Food Facts utiliza claves `foodlens:product-cache:v2:<barcode>` y
 caduca a los 30 minutos. Una caché llena, corrupta o no disponible no impide
 consultar el producto por red.
 
@@ -33,6 +34,7 @@ El comando `npm test` utiliza el runner nativo de Node y `tsx`. Cubre:
 - extracción de códigos y GS1 Digital Link;
 - producto encontrado, no encontrado e indisponibilidad;
 - reutilización de la caché persistente;
+- persistencia y validación de favoritos reales;
 - serialización, restauración, versión desconocida y datos corruptos.
 
 Las pruebas no realizan llamadas reales a servicios externos.
@@ -53,4 +55,4 @@ Las pruebas no realizan llamadas reales a servicios externos.
   dispositivos ni backend de usuario.
 - Todavía no hay pruebas de componentes, accesibilidad o navegador real.
 - Cámara y linterna requieren validación manual en dispositivos físicos HTTPS.
-- La pipeline verifica el código, pero no despliega la aplicación.
+- El despliegue se valida mediante un workflow separado de GitHub Pages.

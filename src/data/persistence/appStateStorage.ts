@@ -6,7 +6,7 @@ import {
   HistoryItem,
   Product,
 } from '../../types/foodlens';
-import { ExternalHistoryItem, FoodLensProduct } from '../../domain/product/FoodLensProduct';
+import { ExternalFavoriteItem, ExternalHistoryItem, FoodLensProduct } from '../../domain/product/FoodLensProduct';
 
 const STORAGE_KEY = 'foodlens:app-state';
 const STORAGE_VERSION = 1;
@@ -22,6 +22,7 @@ interface PersistedAppStateV1 {
   version: 1;
   history: Array<{ productId: string; scannedAt: string }>;
   externalHistory?: ExternalHistoryItem[];
+  externalFavorites?: ExternalFavoriteItem[];
   favorites: FavoriteItem[];
   favoriteLists: Array<{ id: string; name: string }>;
   basket: Array<{ productId: string; quantity: number; addedAt: string }>;
@@ -34,6 +35,7 @@ interface PersistedAppStateV1 {
 export interface AppStateSnapshot {
   history: HistoryItem[];
   externalHistory: ExternalHistoryItem[];
+  externalFavorites: ExternalFavoriteItem[];
   favorites: FavoriteItem[];
   favoriteLists: Array<{ id: string; name: string }>;
   basket: BasketItem[];
@@ -53,6 +55,14 @@ export function getBrowserStorage(): Storage | null {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
+
+const isExternalProductItem = (item: unknown): boolean => {
+  if (!isRecord(item) || !isRecord(item.product)) return false;
+  const product = item.product as unknown as FoodLensProduct;
+  return typeof product.barcode === 'string'
+    && typeof product.name === 'string'
+    && product.source?.provider === 'Open Food Facts';
+};
 
 export function loadAppState(
   storage: Storage | null = getBrowserStorage(),
@@ -81,13 +91,10 @@ export function loadAppState(
           })
         : undefined,
       externalHistory: Array.isArray(state.externalHistory)
-        ? state.externalHistory.filter(item => {
-            if (!isRecord(item) || !isRecord(item.product)) return false;
-            const product = item.product as unknown as FoodLensProduct;
-            return typeof product.barcode === 'string'
-              && typeof product.name === 'string'
-              && product.source?.provider === 'Open Food Facts';
-          }) as ExternalHistoryItem[]
+        ? state.externalHistory.filter(isExternalProductItem) as ExternalHistoryItem[]
+        : undefined,
+      externalFavorites: Array.isArray(state.externalFavorites)
+        ? state.externalFavorites.filter(isExternalProductItem) as ExternalFavoriteItem[]
         : undefined,
       favorites: Array.isArray(state.favorites)
         ? state.favorites.filter(item => isRecord(item) && typeof item.productId === 'string') as FavoriteItem[]
@@ -137,6 +144,7 @@ export function saveAppState(
       scannedAt: item.scannedAt,
     })),
     externalHistory: snapshot.externalHistory,
+    externalFavorites: snapshot.externalFavorites,
     favorites: snapshot.favorites,
     favoriteLists: snapshot.favoriteLists,
     basket: snapshot.basket.map(item => ({

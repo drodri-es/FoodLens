@@ -21,6 +21,7 @@ export const HomeView: React.FC = () => {
     openScanner, 
     history, 
     externalHistory,
+    externalFavorites,
     openExternalProduct,
     openProductById, 
     setActiveTab, 
@@ -92,6 +93,43 @@ export const HomeView: React.FC = () => {
       </header>
 
       <div className="px-4 pt-5 space-y-5 max-w-md mx-auto">
+        {externalFavorites.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between px-1 mb-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Favoritos reales</h3>
+              <DataOriginBadge kind="source" label="Guardados en este dispositivo" />
+            </div>
+            <div className="space-y-2.5">
+              {externalFavorites.slice(0, 4).map(item => {
+                const score = calculateFoodLensScore(item.product);
+                return (
+                  <button
+                    key={item.product.barcode}
+                    onClick={() => openExternalProduct(item.product)}
+                    className="w-full bg-white rounded-3xl p-3.5 border border-rose-200 shadow-xs flex items-center gap-3 text-left"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-stone-50 border border-stone-200/50 p-1 flex items-center justify-center shrink-0">
+                      {item.product.imageUrl ? (
+                        <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-contain" />
+                      ) : (
+                        <Heart className="w-5 h-5 text-rose-500" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {item.addedAt}</span>
+                      <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
+                      {score
+                        ? <ScoreBadge score={score.overall} label="Experimental" size="sm" />
+                        : <span className="text-[10px] text-stone-500">Datos insuficientes para puntuar</span>}
+                    </div>
+                    <Heart className="w-4 h-4 text-rose-500 fill-current shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {externalHistory.length > 0 && (
           <section>
             <div className="flex items-center justify-between px-1 mb-2.5">

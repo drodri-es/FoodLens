@@ -9,7 +9,7 @@ import {
 } from '../types/foodlens';
 import { MOCK_PRODUCTS } from '../data/mockProducts';
 import { productRepository } from '../data/products/ProductRepository';
-import { ExternalHistoryItem, FoodLensProduct } from '../domain/product/FoodLensProduct';
+import { ExternalFavoriteItem, ExternalHistoryItem, FoodLensProduct } from '../domain/product/FoodLensProduct';
 import { loadAppState, saveAppState } from '../data/persistence/appStateStorage';
 
 interface FoodLensContextType {
@@ -36,7 +36,10 @@ interface FoodLensContextType {
   // History
   history: HistoryItem[];
   externalHistory: ExternalHistoryItem[];
+  externalFavorites: ExternalFavoriteItem[];
   openExternalProduct: (product: FoodLensProduct) => void;
+  toggleExternalFavorite: (product: FoodLensProduct) => void;
+  isExternalFavorite: (barcode: string) => boolean;
   addToHistory: (product: Product) => void;
   removeFromHistory: (productId: string) => void;
   clearHistory: () => void;
@@ -132,6 +135,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ];
   });
   const [externalHistory, setExternalHistory] = useState<ExternalHistoryItem[]>(persistedState.externalHistory ?? []);
+  const [externalFavorites, setExternalFavorites] = useState<ExternalFavoriteItem[]>(persistedState.externalFavorites ?? []);
 
   const [favorites, setFavorites] = useState<FavoriteItem[]>(persistedState.favorites ?? [
     { productId: MOCK_PRODUCTS[0].id, listId: 'desayuno', addedAt: 'Ayer' },
@@ -190,6 +194,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveAppState({
       history,
       externalHistory,
+      externalFavorites,
       favorites,
       favoriteLists,
       basket,
@@ -201,6 +206,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [
     history,
     externalHistory,
+    externalFavorites,
     favorites,
     favoriteLists,
     basket,
@@ -248,6 +254,19 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const openExternalProduct = (product: FoodLensProduct) => {
     setCurrentProduct(null);
     setCurrentExternalProduct(product);
+  };
+
+  const isExternalFavorite = (barcode: string) =>
+    externalFavorites.some(item => item.product.barcode === barcode);
+
+  const toggleExternalFavorite = (product: FoodLensProduct) => {
+    const wasFavorite = isExternalFavorite(product.barcode);
+    setExternalFavorites(previous => {
+      const exists = previous.some(item => item.product.barcode === product.barcode);
+      if (exists) return previous.filter(item => item.product.barcode !== product.barcode);
+      return [{ product, addedAt: 'Ahora mismo' }, ...previous].slice(0, 100);
+    });
+    showToast(wasFavorite ? 'Eliminado de favoritos' : 'Guardado en favoritos', 'success');
   };
 
   const openScanner = () => setIsScannerOpen(true);
@@ -467,7 +486,10 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         scanBarcode,
         history,
         externalHistory,
+        externalFavorites,
         openExternalProduct,
+        toggleExternalFavorite,
+        isExternalFavorite,
         addToHistory,
         removeFromHistory,
         clearHistory,

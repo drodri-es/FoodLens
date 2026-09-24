@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Database, Info, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Database, Heart, Info, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { DataOriginBadge } from '../ui/DataOrigin';
@@ -9,6 +9,8 @@ import { NutriScoreGrade } from '../../types/foodlens';
 interface ExternalProductViewProps {
   product: FoodLensProduct;
   onBack: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
 const nutritionLabels: Array<[keyof FoodLensProduct['nutrition'], string, string]> = [
@@ -22,7 +24,12 @@ const nutritionLabels: Array<[keyof FoodLensProduct['nutrition'], string, string
   ['salt', 'Sal', 'g'],
 ];
 
-export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ product, onBack }) => {
+export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
+  product,
+  onBack,
+  isFavorite,
+  onToggleFavorite,
+}) => {
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
   const score = calculateFoodLensScore(product);
   const confidenceLabel = score && (score.confidence >= 70
@@ -39,10 +46,20 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({ produc
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-sm font-extrabold">Producto consultado</h1>
           <span className="text-[11px] text-stone-500">Datos reales y valoración experimental</span>
         </div>
+        <button
+          onClick={onToggleFavorite}
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          aria-pressed={isFavorite}
+          className={`w-9 h-9 rounded-full flex items-center justify-center ${
+            isFavorite ? 'bg-rose-50 text-rose-600' : 'bg-stone-100 text-stone-600'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </button>
       </header>
 
       <main className="max-w-md mx-auto p-4 space-y-4">

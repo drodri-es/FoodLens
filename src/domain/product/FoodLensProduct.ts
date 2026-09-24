@@ -45,6 +45,11 @@ export interface ExternalHistoryItem {
   scannedAt: string;
 }
 
+export interface ExternalFavoriteItem {
+  product: FoodLensProduct;
+  addedAt: string;
+}
+
 export type ProductLookupResult =
   | { status: 'found'; product: FoodLensProduct; fromCache: boolean }
   | { status: 'not-found'; barcode: string }
