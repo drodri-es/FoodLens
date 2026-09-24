@@ -2,6 +2,7 @@ import React from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
 import { DataOriginBadge, DemoDataNotice } from '../ui/DataOrigin';
+import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { 
   Scan, 
   Scale, 
@@ -98,7 +99,9 @@ export const HomeView: React.FC = () => {
               <DataOriginBadge kind="source" label="Open Food Facts" />
             </div>
             <div className="space-y-2.5">
-              {externalHistory.slice(0, 4).map(item => (
+              {externalHistory.slice(0, 4).map(item => {
+                const score = calculateFoodLensScore(item.product);
+                return (
                 <button
                   key={item.product.barcode}
                   onClick={() => openExternalProduct(item.product)}
@@ -114,11 +117,14 @@ export const HomeView: React.FC = () => {
                   <div className="min-w-0 flex-1">
                     <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {item.scannedAt}</span>
                     <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
-                    <span className="text-[10px] text-stone-500">Sin puntuación FoodLens</span>
+                    {score
+                      ? <ScoreBadge score={score.overall} label="Experimental" size="sm" />
+                      : <span className="text-[10px] text-stone-500">Datos insuficientes para puntuar</span>}
                   </div>
                   <ChevronRight className="w-4 h-4 text-stone-400" />
                 </button>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

@@ -277,7 +277,7 @@ export const ExploreView: React.FC = () => {
               <label className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 border border-stone-200/60 cursor-pointer">
                 <div>
                   <span className="font-bold text-xs text-stone-900 block">Alto en fibra</span>
-                  <span className="text-[11px] text-stone-500">Mínimo 6 g de fibra saciante / 100 g</span>
+                  <span className="text-[11px] text-stone-500">Mínimo 6 g de fibra / 100 g</span>
                 </div>
                 <input
                   type="checkbox"

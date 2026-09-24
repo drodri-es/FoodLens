@@ -18,6 +18,8 @@ la definición de producto marca la dirección de desarrollo.
   externos, cálculos, estimaciones y contenido de demostración.
 - [Persistencia y calidad](./QUALITY_AND_PERSISTENCE.md): almacenamiento local,
   pruebas automatizadas, CI y limitaciones pendientes.
+- [Auditoría de afirmaciones nutricionales](./NUTRITION_CLAIMS_AUDIT.md): criterios,
+  correcciones, fuentes y control automático de lenguaje no respaldado.
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

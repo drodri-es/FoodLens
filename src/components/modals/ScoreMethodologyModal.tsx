@@ -16,7 +16,7 @@ export const ScoreMethodologyModal: React.FC = () => {
             <h2 className="text-base font-extrabold text-stone-900">
               Cómo funciona nuestra valoración
             </h2>
-            <span className="text-xs text-stone-500">Metodología v0.1 · Prototipo</span>
+            <span className="text-xs text-stone-500">Metodología v0.2 · Prototipo</span>
           </div>
           <button
             onClick={closeScoreModal}
@@ -35,7 +35,7 @@ export const ScoreMethodologyModal: React.FC = () => {
           <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-start gap-2.5 text-violet-950">
             <FlaskConical className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
             <p>
-              <strong>Estado del prototipo:</strong> las puntuaciones que ves son datos de demostración cargados manualmente. Los pesos siguientes son el modelo propuesto y todavía no se aplican mediante un algoritmo validado.
+              <strong>Dos modos:</strong> el catálogo contiene puntuaciones ficticias marcadas como demostración. Los productos escaneados usan el cálculo experimental 0.1.0, con entradas normalizadas de Open Food Facts, desglose y nivel de confianza.
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export const ScoreMethodologyModal: React.FC = () => {
               1. Calidad Nutricional (Ponderación 45 %)
             </div>
             <p className="text-stone-600">
-              Evalúa la presencia de fibra, proteínas de calidad, grasas saludables frente a la densidad de azúcares libres, grasas saturadas y sal.
+              En productos escaneados utiliza la valoración Nutri-Score normalizada que entrega Open Food Facts; FoodLens no recalcula ni modifica esa valoración.
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export const ScoreMethodologyModal: React.FC = () => {
               2. Composición de Ingredientes (Ponderación 25 %)
             </div>
             <p className="text-stone-600">
-              Premia ingredientes de grano entero o materias primas puras y evalúa el orden de los componentes (si el azúcar figura entre los primeros puestos).
+              Esta dimensión permanece sin evaluar en productos reales hasta disponer de reglas verificables y fuentes adecuadas. Los alérgenos no reducen la puntuación.
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export const ScoreMethodologyModal: React.FC = () => {
               3. Grado de Procesamiento (Ponderación 15 %)
             </div>
             <p className="text-stone-600">
-              Basado en el sistema internacional NOVA (1 a 4). No equiparamos automáticamente ultraprocesado a 'dañino', pero orientamos hacia opciones con procesos más sencillos.
+              Utiliza el atributo NOVA normalizado por Open Food Facts. La clasificación se muestra por separado y no se describe como un diagnóstico del producto.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export const ScoreMethodologyModal: React.FC = () => {
               4. Evaluación de Aditivos (Ponderación 15 %)
             </div>
             <p className="text-stone-600">
-              La versión de producción deberá vincular cada valoración a una evaluación oficial identificable y fechada. Esa consulta automática todavía no está implementada.
+              Utiliza el atributo de aditivos de Open Food Facts. Las fichas de demostración no califican un aditivo como seguro o peligroso sin una evaluación identificable y aplicable al uso concreto.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export const ScoreMethodologyModal: React.FC = () => {
             <div className="flex items-start gap-2 text-stone-500">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <p>
-                <strong>Trazabilidad pendiente:</strong> la versión de producción mostrará la fuente, la fecha, los datos utilizados, la versión del algoritmo y cualquier información ausente.
+                <strong>Trazabilidad:</strong> los productos escaneados muestran fuente, fecha, versión del algoritmo, dimensiones utilizadas e información ausente.
               </p>
             </div>
           </div>

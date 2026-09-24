@@ -6,12 +6,12 @@ import breadImg from '../assets/images/whole_wheat_bread_1790111778643.jpg';
 import oilImg from '../assets/images/olive_oil_extra_virgin_1790111788739.jpg';
 
 export const HEALTH_GOALS: GoalDefinition[] = [
-  { id: 'reduce_sugar', label: 'Reducir azúcar', description: 'Prioriza alimentos con menos de 5 g de azúcar / 100 g o sin azúcares añadidos', iconName: 'CandyOff' },
-  { id: 'reduce_salt', label: 'Reducir sal', description: 'Limita productos con más de 1 g de sal / 100 g', iconName: 'Waves' },
-  { id: 'increase_protein', label: 'Aumentar proteína', description: 'Destaca alimentos con más de 10 g de proteína / 100 g', iconName: 'Dumbbell' },
+  { id: 'reduce_sugar', label: 'Reducir azúcar', description: 'Compara los azúcares declarados por 100 g o 100 ml', iconName: 'CandyOff' },
+  { id: 'reduce_salt', label: 'Reducir sal', description: 'Compara la sal declarada por 100 g o 100 ml', iconName: 'Waves' },
+  { id: 'increase_protein', label: 'Aumentar proteína', description: 'Compara la proteína declarada por 100 g', iconName: 'Dumbbell' },
   { id: 'increase_fiber', label: 'Aumentar fibra', description: 'Busca productos ricos en fibra (> 6 g / 100 g)', iconName: 'Sprout' },
-  { id: 'reduce_sat_fat', label: 'Reducir grasas saturadas', description: 'Prefiere fuentes de grasas insaturadas cardiosaludables', iconName: 'HeartPulse' },
-  { id: 'reduce_calories', label: 'Reducir densidad calórica', description: 'Prioriza alimentos saciantes con menor aporte energético', iconName: 'Scale' },
+  { id: 'reduce_sat_fat', label: 'Reducir grasas saturadas', description: 'Compara el contenido declarado de grasas saturadas', iconName: 'HeartPulse' },
+  { id: 'reduce_calories', label: 'Reducir densidad calórica', description: 'Compara el aporte energético declarado por 100 g', iconName: 'Scale' },
   { id: 'avoid_ultraprocessed', label: 'Evitar ultraprocesados', description: 'Minimiza alimentos clasificados como NOVA 4', iconName: 'ShieldCheck' },
   { id: 'prefer_whole_foods', label: 'Preferir alimentos simples', description: 'Listas de ingredientes cortas y materias primas integrales', iconName: 'Leaf' },
 ];
@@ -57,7 +57,7 @@ export const MOCK_PRODUCTS: Product[] = [
       additives: {
         score: 89,
         label: 'Sin preocupación relevante',
-        summary: 'Solo contiene 1 aditivo emulsionante seguro (lecitina de girasol).',
+        summary: 'Declara 1 aditivo emulsionante (lecitina de girasol).',
         count: 1
       }
     },
@@ -106,8 +106,8 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Emulsionante',
         status: 'Autorizado en la UE',
         assessment: 'Sin preocupación relevante en las cantidades habituales.',
-        riskLevel: 'safe',
-        evidenceNote: 'Compuesto natural presente en células vegetales, bien tolerado y seguro.',
+        riskLevel: 'insufficient_data',
+        evidenceNote: 'El fixture no incluye una fuente ni una evaluación vigente para este uso concreto.',
         concentrationKnown: false
       }
     ],
@@ -196,7 +196,7 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     },
     pros: [
-      '10 g de fibra por 100 g (rica en betaglucanos saciantes)',
+      '10 g de fibra por 100 g',
       'Apenas 0,7 g de azúcar intrínseco (sin azúcares añadidos)',
       '13,5 g de proteína vegetal',
       'Ingrediente único y mínimamente procesado (NOVA 1)'
@@ -310,7 +310,7 @@ export const MOCK_PRODUCTS: Product[] = [
       '28 g de azúcar añadido / 100 g (casi un tercio del producto)',
       'Harina de maíz refinada de rápida digestión',
       'Ultraprocesado NOVA 4 con jarabe de glucosa y emulsionantes',
-      'Bajo en fibra saciante (2,1 g / 100 g)'
+      '2,1 g de fibra por 100 g'
     ],
     serving: {
       standardUnit: '100 g',
@@ -346,8 +346,8 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Emulsionante',
         status: 'Autorizado en la UE',
         assessment: 'Uso generalizado; conviene vigilar en dietas altas en ultraprocesados.',
-        riskLevel: 'moderate',
-        evidenceNote: 'Estudios sugieren posible impacto en microbiota intestinal con exposición acumulativa alta.',
+        riskLevel: 'insufficient_data',
+        evidenceNote: 'El fixture no identifica una fuente ni permite valorar la exposición real.',
         concentrationKnown: false
       },
       {
@@ -356,7 +356,7 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Colorante marrón',
         status: 'Autorizado en la UE con IDA establecida',
         assessment: 'Consumo habitual moderado.',
-        riskLevel: 'moderate',
+        riskLevel: 'insufficient_data',
         evidenceNote: 'Obtenido por calentamiento de azúcares con compuestos de amonio.',
         concentrationKnown: false
       }
@@ -425,7 +425,7 @@ export const MOCK_PRODUCTS: Product[] = [
       nutrition: {
         score: 89,
         label: 'Muy buena',
-        summary: 'Rico en proteínas lácteas de alto valor biológico y calcio biodisponible.'
+        summary: 'La ficha declara proteínas y calcio; no cuantifica la biodisponibilidad.'
       },
       ingredients: {
         score: 95,
@@ -447,7 +447,7 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     pros: [
       'Sin azúcar añadido (solo 3,8 g de lactosa natural)',
-      '9,2 g de proteína por envase (saciante y nutritivo)',
+      '9,2 g de proteína por envase',
       'Aporte natural de probióticos (Lactobacillus bulgaricus)',
       'Lista limpia con solo 3 ingredientes esenciales'
     ],
@@ -475,7 +475,7 @@ export const MOCK_PRODUCTS: Product[] = [
       highlighted: [
         { name: 'Leche entera pasteurizada', type: 'neutral', note: 'Calcio y proteínas naturales' },
         { name: 'nata fresca', type: 'neutral', note: 'Aporta cremosidad natural' },
-        { name: 'fermentos lácticos vivos', type: 'neutral', note: 'Bacterias probióticas beneficiosas' },
+        { name: 'fermentos lácticos vivos', type: 'neutral', note: 'Cultivos declarados en el fixture' },
         { name: 'leche', type: 'allergen', note: 'Contiene lactosa' }
       ],
       summary: 'Receta tradicional sin azúcares, conservantes ni gelificantes.'
@@ -486,7 +486,7 @@ export const MOCK_PRODUCTS: Product[] = [
       level: 'Mínimo',
       shortExplanation: 'Fermentación natural de leche fresca mediante cultivos vivos.',
       whatMeans: 'Proceso biológico ancestral que preserva e incrementa nutrientes y digestibilidad.',
-      notAutomaticallyBadNote: 'Excelente ejemplo de alimento procesado de manera beneficiosa.'
+      notAutomaticallyBadNote: 'El tipo de procesamiento se muestra por separado de la valoración nutricional.'
     },
     categoryComparison: {
       categoryName: 'yogures y lácteos',
@@ -594,8 +594,8 @@ export const MOCK_PRODUCTS: Product[] = [
       nova: 3,
       level: 'Elaborado',
       shortExplanation: 'Alimento procesado mediante técnica culinaria clásica de fermentación y horneado.',
-      whatMeans: 'La combinación de ingredientes simples produce una digestión óptima y biodisponibilidad mineral.',
-      notAutomaticallyBadNote: 'Procesamiento culinario positivo que mejora la absorción de nutrientes.'
+      whatMeans: 'El fixture describe una formulación breve basada en harina, agua, masa madre y sal.',
+      notAutomaticallyBadNote: 'No se atribuyen efectos digestivos o de absorción sin una fuente específica.'
     },
     categoryComparison: {
       categoryName: 'panes y tostadas',
@@ -671,7 +671,7 @@ export const MOCK_PRODUCTS: Product[] = [
       '3,8 g de azúcar añadido para dorar la corteza',
       'Harina de trigo refinada sin salvado ni germen',
       'Contiene propionato cálcico (E282) como conservante antifúngico',
-      'Baja capacidad saciante'
+      'El fixture no evalúa la saciedad'
     ],
     serving: {
       standardUnit: '100 g',
@@ -706,7 +706,7 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Conservante antifúngico',
         status: 'Autorizado en la UE',
         assessment: 'Uso aprobado; puede causar sensibilidad en personas susceptibles.',
-        riskLevel: 'moderate',
+        riskLevel: 'insufficient_data',
         evidenceNote: 'Inhibe el moho en panes embolsados industriales.',
         concentrationKnown: false
       }
@@ -756,7 +756,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Aceite de Oliva Virgen Extra Ecológico',
     brand: 'Hacienda Verde',
     quantity: '750 ml',
-    category: 'Aceites y grasas saludables',
+    category: 'Aceites y grasas',
     imageUrl: oilImg,
     score: 95,
     scoreLabel: 'Excelente',
@@ -786,7 +786,7 @@ export const MOCK_PRODUCTS: Product[] = [
       }
     },
     pros: [
-      'Grasa cardiosaludable rica en ácido oleico (75%)',
+      '75 % de ácido oleico declarado en el fixture',
       'Alto contenido en antioxidantes naturales y polifenoles',
       'Extracción en frío exclusivamente por medios mecánicos',
       'Cero sodio, cero azúcares'
@@ -861,7 +861,7 @@ export const MOCK_PRODUCTS: Product[] = [
       nutrition: {
         score: 88,
         label: 'Muy buena',
-        summary: 'Rico en fibra vegetal, hierro y grasas saludables poliinsaturadas.'
+        summary: 'El fixture declara fibra, hierro y grasas poliinsaturadas.'
       },
       ingredients: {
         score: 89,
@@ -883,7 +883,7 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     pros: [
       'Fuente natural de fibra (6,4 g / 100 g)',
-      'Grasas cardiosaludables de sésamo y AOVE',
+      'Grasas procedentes de sésamo y AOVE',
       'Sin azúcares añadidos (solo 0,8 g naturales)',
       '6,8 g de proteína vegetal'
     ],
@@ -922,9 +922,9 @@ export const MOCK_PRODUCTS: Product[] = [
         name: 'Ácido cítrico',
         function: 'Acidulante y conservador natural',
         status: 'Autorizado en la UE',
-        assessment: 'Completamente seguro e inocuo.',
-        riskLevel: 'safe',
-        evidenceNote: 'Intermediario del metabolismo celular humano.',
+        assessment: 'Sin valoración específica en este fixture.',
+        riskLevel: 'insufficient_data',
+        evidenceNote: 'Debe consultarse una fuente regulatoria vigente para el uso y la dosis concretos.',
         concentrationKnown: false
       }
     ],
@@ -933,7 +933,7 @@ export const MOCK_PRODUCTS: Product[] = [
       level: 'Culinario',
       shortExplanation: 'Elaboración mediante cocción y emulsión mecánica.',
       whatMeans: 'Composición similar a la preparación doméstica tradicional.',
-      notAutomaticallyBadNote: 'Excelente opción de snack y picoteo saciante.'
+      notAutomaticallyBadNote: 'La ficha no evalúa saciedad ni recomienda una frecuencia de consumo.'
     },
     categoryComparison: {
       categoryName: 'untables y dips',
@@ -1032,7 +1032,7 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Acidulante y conservador',
         status: 'Autorizado en la UE con ingesta diaria admisible',
         assessment: 'Conviene moderar la exposición frecuente.',
-        riskLevel: 'caution',
+        riskLevel: 'insufficient_data',
         evidenceNote: 'El consumo excesivo de fosfatos puede desequilibrar la ratio calcio-fósforo.',
         concentrationKnown: false
       },
@@ -1041,9 +1041,9 @@ export const MOCK_PRODUCTS: Product[] = [
         name: 'Caramelo de sulfito amónico',
         function: 'Colorante marrón',
         status: 'Autorizado en la UE',
-        assessment: 'Seguro en dosis reguladas, presente en refrescos oscuros.',
-        riskLevel: 'moderate',
-        evidenceNote: 'Evaluado periódicamente por la EFSA.',
+        assessment: 'La autorización depende del uso y de las condiciones regulatorias aplicables.',
+        riskLevel: 'insufficient_data',
+        evidenceNote: 'El fixture no enlaza la evaluación ni confirma la dosis del producto.',
         concentrationKnown: false
       }
     ],
@@ -1052,7 +1052,7 @@ export const MOCK_PRODUCTS: Product[] = [
       level: 'Muy alto',
       shortExplanation: 'Bebida 100% sintética obtenida por disolución de jarabes y gas carbónico.',
       whatMeans: 'No contiene ingredientes de origen natural intacto.',
-      notAutomaticallyBadNote: 'Consumo recomendable únicamente de forma muy esporádica.'
+      notAutomaticallyBadNote: 'La ficha muestra los datos; no prescribe una frecuencia individual de consumo.'
     },
     categoryComparison: {
       categoryName: 'refrescos carbonatados',
@@ -1162,7 +1162,7 @@ export const MOCK_PRODUCTS: Product[] = [
         function: 'Sales fundentes y emulsionantes',
         status: 'Autorizado en la UE con IDA',
         assessment: 'Conviene moderar la exposición frecuente.',
-        riskLevel: 'moderate',
+        riskLevel: 'insufficient_data',
         evidenceNote: 'Utilizado para fundir quesos homogéneamente.',
         concentrationKnown: false
       }
@@ -1232,7 +1232,7 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     pros: [
       'Cero sal añadida (solo 0,02 g natural)',
-      'Excelente fuente de fibra saciante (8,5 g / 100 g)',
+      'Alto contenido de fibra (8,5 g / 100 g)',
       '18 g de proteína vegetal',
       'Alto contenido en grasas poliinsaturadas protectoras'
     ],
@@ -1321,19 +1321,19 @@ export function calculatePersonalFit(product: Product, activeGoals: string[]): {
   if (activeGoals.includes('reduce_sugar')) {
     if (per100g.sugars <= 5) {
       delta += 14;
-      reasons.push('Muy bajo en azúcar (' + per100g.sugars + ' g / 100 g)');
+      reasons.push('Azúcares declarados: ' + per100g.sugars + ' g / 100 g');
     } else if (per100g.sugars > 15) {
       delta -= 16;
       caveats.push('Alto en azúcares (' + per100g.sugars + ' g / 100 g)');
     } else {
-      reasons.push('Nivel moderado de azúcar (' + per100g.sugars + ' g / 100 g)');
+      reasons.push('Azúcares declarados: ' + per100g.sugars + ' g / 100 g');
     }
   }
 
   if (activeGoals.includes('increase_fiber')) {
     if (per100g.fiber >= 6) {
       delta += 14;
-      reasons.push('Excelente aporte de fibra (' + per100g.fiber + ' g / 100 g)');
+      reasons.push('Alto contenido de fibra (' + per100g.fiber + ' g / 100 g)');
     } else if (per100g.fiber < 2) {
       delta -= 8;
       caveats.push('Pobre en fibra (' + per100g.fiber + ' g)');
@@ -1343,7 +1343,7 @@ export function calculatePersonalFit(product: Product, activeGoals: string[]): {
   if (activeGoals.includes('increase_protein')) {
     if (per100g.protein >= 10) {
       delta += 12;
-      reasons.push('Alto en proteína (' + per100g.protein + ' g / 100 g)');
+      reasons.push('Proteína declarada: ' + per100g.protein + ' g / 100 g');
     } else if (per100g.protein < 3) {
       delta -= 6;
       caveats.push('Aporte proteico bajo (' + per100g.protein + ' g)');
@@ -1353,7 +1353,7 @@ export function calculatePersonalFit(product: Product, activeGoals: string[]): {
   if (activeGoals.includes('reduce_salt')) {
     if (per100g.salt <= 0.4) {
       delta += 10;
-      reasons.push('Bajo contenido en sal (' + per100g.salt + ' g / 100 g)');
+      reasons.push('Sal declarada: ' + per100g.salt + ' g / 100 g');
     } else if (per100g.salt >= 1.2) {
       delta -= 14;
       caveats.push('Contenido de sal elevado (' + per100g.salt + ' g / 100 g)');
@@ -1373,7 +1373,7 @@ export function calculatePersonalFit(product: Product, activeGoals: string[]): {
   if (activeGoals.includes('reduce_sat_fat')) {
     if (per100g.satFat <= 1.5) {
       delta += 10;
-      reasons.push('Bajo en grasas saturadas (' + per100g.satFat + ' g)');
+      reasons.push('Grasas saturadas declaradas: ' + per100g.satFat + ' g / 100 g');
     } else if (per100g.satFat >= 5) {
       delta -= 12;
       caveats.push('Grasas saturadas a vigilar (' + per100g.satFat + ' g)');

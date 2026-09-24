@@ -79,7 +79,7 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Mira el análisis de ${product.name} en FoodLens (Puntuación: ${product.score}/100)`,
+        text: `Mira la ficha de demostración de ${product.name} en FoodLens (puntuación simulada: ${product.score}/100)`,
         url: window.location.href,
       }).catch(() => {});
     } else {
@@ -123,6 +123,10 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
           </button>
         </div>
       </header>
+
+      <div className="bg-white px-5 pt-3">
+        <DemoDataNotice />
+      </div>
 
       {/* 2. Hero Product Info */}
       <div className="bg-white px-5 pt-4 pb-6 border-b border-stone-200/70">
@@ -174,8 +178,6 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
       </div>
 
       <div className="px-4 pt-4 space-y-4 max-w-md mx-auto">
-        <DemoDataNotice />
-
         {/* 3. Personalized Fit Card ("Encaje contigo") */}
         {userGoals.length > 0 && (
           <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-3xl p-5 border border-emerald-200/70 shadow-sm">
@@ -582,7 +584,7 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
         <div className="bg-white rounded-3xl p-5 border border-stone-200/70 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-stone-900">Aditivos ({product.additivesList.length})</h2>
-            <span className="text-xs text-stone-500">Evaluación científica</span>
+            <DataOriginBadge kind="demo" label="Sin evaluación vinculada" />
           </div>
 
           {product.additivesList.length === 0 ? (
@@ -602,9 +604,9 @@ export const ProductDetailView: React.FC<ProductDetailProps> = ({ product, onBac
                       <span className="text-xs font-semibold text-stone-800">{add.name}</span>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      add.riskLevel === 'safe' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      add.riskLevel === 'no_concern_identified' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                     }`}>
-                      {add.riskLevel === 'safe' ? 'Seguro' : 'Atención'}
+                      {add.riskLevel === 'no_concern_identified' ? 'Sin preocupación identificada' : 'Revisión pendiente'}
                     </span>
                   </div>
                   <div className="text-xs text-stone-500 mb-2">

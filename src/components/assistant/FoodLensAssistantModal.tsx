@@ -63,13 +63,13 @@ export const FoodLensAssistantModal: React.FC = () => {
       const q = query.toLowerCase();
 
       if (q.includes('76') || q.includes('choco crunch') || q.includes('por qué')) {
-        botResponse = 'Los Cereales Choco Crunch obtienen 76/100 ("Buena opción") porque aportan 8,2 g de fibra y grano integral, con solo 1 aditivo seguro (lecitina de girasol). Su puntuación no es superior debido a que contiene 12 g de azúcar por 100 g y se elabora mediante extrusión industrial (NOVA 4).';
+        botResponse = 'En el fixture, los Cereales Choco Crunch tienen una puntuación simulada de 76/100. La ficha declara 8,2 g de fibra, 12 g de azúcares por 100 g, un aditivo y clasificación NOVA 4. La nota no procede todavía de una evaluación nutricional validada.';
         action = { label: 'Ver ficha de Choco Crunch', productId: 'prod-cereales-choco-crunch' };
       } else if (q.includes('menos azúcar')) {
         botResponse = 'De los cereales analizados, los Copos de Avena Integral tienen apenas 0,7 g de azúcar intrínseco (sin azúcares añadidos), frente a los 12 g de Choco Crunch y los 28 g de Choco Puffs.';
         action = { label: 'Ver Avena en Copos (0,7g azúcar)', productId: 'prod-copos-avena-integral' };
       } else if (q.includes('fibra')) {
-        botResponse = 'La mejor alternativa en contenido de fibra son los Copos de Avena Integral (10 g de fibra por 100 g, rica en betaglucanos saciantes). Supera en un 88% la media de su categoría.';
+        botResponse = 'Dentro de este fixture, los Copos de Avena Integral son la opción con más fibra declarada: 10 g por 100 g. La comparación utiliza únicamente los productos ficticios incluidos en la demostración.';
         action = { label: 'Ver Avena Integral (10g fibra)', productId: 'prod-copos-avena-integral' };
       } else if (q.includes('nova') || q.includes('procesamiento')) {
         botResponse = 'La clasificación NOVA divide los alimentos del 1 (sin procesar) al 4 (ultraprocesados). Un alimento NOVA 4 contiene ingredientes o procesos industriales como extrusión o emulsionantes. En FoodLens explicamos que NOVA 4 no significa automáticamente dañino, pero conviene que la base de la dieta provenga de NOVA 1 y 2.';

@@ -27,7 +27,7 @@ export interface AdditiveItem {
   function: string;
   status: string; // e.g. "Autorizado en la UE"
   assessment: string; // e.g. "Sin preocupación relevante"
-  riskLevel: 'safe' | 'moderate' | 'caution';
+  riskLevel: 'no_concern_identified' | 'attention' | 'insufficient_data';
   evidenceNote: string;
   concentrationKnown: boolean;
 }
