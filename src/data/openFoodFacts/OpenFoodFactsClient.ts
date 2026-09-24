@@ -30,10 +30,6 @@ export class OpenFoodFactsClient {
   async getProduct(barcode: string, signal?: AbortSignal): Promise<OpenFoodFactsProductResponse> {
     const url = `${this.baseUrl}/product/${encodeURIComponent(barcode)}.json?fields=${PRODUCT_FIELDS}`;
     const response = await this.fetcher(url, {
-      headers: {
-        Accept: 'application/json',
-        'X-User-Agent': 'FoodLens/0.0.0 (web application)',
-      },
       signal,
     });
 

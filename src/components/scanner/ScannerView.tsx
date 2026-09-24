@@ -163,7 +163,9 @@ export const ScannerView: React.FC = () => {
 
     if (!res.found) {
       if (res.reason === 'unavailable') {
-        setLookupError('No se pudo consultar Open Food Facts. La cámara está bien; comprueba la conexión y reintenta la consulta.');
+        setLookupError(
+          `La cámara está bien, pero Open Food Facts no respondió. ${res.message ?? 'Comprueba la conexión y reintenta la consulta.'}`,
+        );
         return;
       }
       setMissingBarcode(code);

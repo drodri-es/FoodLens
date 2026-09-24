@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { OpenFoodFactsClient } from '../src/data/openFoodFacts/OpenFoodFactsClient';
 
-test('uses the browser-compatible Open Food Facts identification header', async () => {
+test('uses a simple browser request that does not trigger a CORS preflight', async () => {
   let requestedUrl = '';
-  let requestedHeaders: HeadersInit | undefined;
+  let requestedInit: RequestInit | undefined;
   const fetcher: typeof fetch = async (input, init) => {
     requestedUrl = String(input);
-    requestedHeaders = init?.headers;
+    requestedInit = init;
     return new Response(JSON.stringify({
       status: 'success',
       product: { code: '3017620422003', product_name: 'Product' },
@@ -16,10 +16,8 @@ test('uses the browser-compatible Open Food Facts identification header', async 
 
   await new OpenFoodFactsClient(fetcher).getProduct('3017620422003');
 
-  const headers = new Headers(requestedHeaders);
   assert.match(requestedUrl, /\/api\/v3\/product\/3017620422003\.json/);
-  assert.equal(headers.get('X-User-Agent'), 'FoodLens/0.0.0 (web application)');
-  assert.equal(headers.has('X-OpenFoodFacts-User-Agent'), false);
+  assert.equal(requestedInit?.headers, undefined);
 });
 
 test('returns the structured body for a not-found response', async () => {

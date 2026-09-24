@@ -30,6 +30,7 @@ interface FoodLensContextType {
     product?: Product;
     externalProduct?: FoodLensProduct;
     reason?: 'not-found' | 'invalid-code' | 'unavailable';
+    message?: string;
   }>;
   
   // History
@@ -275,7 +276,11 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return { found: true, externalProduct: result.product };
     }
 
-    return { found: false, reason: result.status };
+    return {
+      found: false,
+      reason: result.status,
+      message: result.status === 'unavailable' ? result.message : undefined,
+    };
   };
 
   const addToHistory = (product: Product) => {
