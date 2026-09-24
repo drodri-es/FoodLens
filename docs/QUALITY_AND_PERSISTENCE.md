@@ -9,7 +9,7 @@ El modo invitado utiliza almacenamiento local versionado bajo
 `foodlens:app-state` (versión 2). Se guardan:
 
 - historial de productos demo mediante identificadores;
-- historial de productos reales normalizados;
+- los últimos 50 productos reales normalizados, con fechas ISO de escaneo;
 - favoritos de productos reales normalizados;
 - favoritos y listas;
 - cesta y cantidades;
@@ -40,6 +40,7 @@ El comando `npm test` utiliza el runner nativo de Node y `tsx`. Cubre:
 - producto encontrado, no encontrado e indisponibilidad;
 - reutilización de la caché persistente;
 - persistencia y validación de favoritos reales;
+- agrupación, búsqueda y formato de fechas del historial real;
 - diferencias entre dos productos reales y tratamiento de valores ausentes;
 - serialización, restauración, versión desconocida y datos corruptos.
 

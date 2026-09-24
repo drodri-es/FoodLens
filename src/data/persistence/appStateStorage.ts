@@ -64,6 +64,20 @@ const isExternalProductItem = (item: unknown): boolean => {
     && product.source?.provider === 'Open Food Facts';
 };
 
+const isValidIsoDate = (value: unknown): value is string =>
+  typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T/.test(value)
+  && Number.isFinite(Date.parse(value));
+
+const normalizeExternalHistoryItem = (item: ExternalHistoryItem): ExternalHistoryItem => ({
+  ...item,
+  scannedAt: isValidIsoDate(item.scannedAt)
+    ? item.scannedAt
+    : isValidIsoDate(item.product.source.fetchedAt)
+      ? item.product.source.fetchedAt
+      : new Date(0).toISOString(),
+});
+
 export function loadAppState(
   storage: Storage | null = getBrowserStorage(),
   products: Product[] = [],
@@ -92,7 +106,8 @@ export function loadAppState(
           })
         : undefined,
       externalHistory: Array.isArray(state.externalHistory)
-        ? state.externalHistory.filter(isExternalProductItem) as ExternalHistoryItem[]
+        ? (state.externalHistory.filter(isExternalProductItem) as ExternalHistoryItem[])
+            .map(normalizeExternalHistoryItem)
         : undefined,
       externalFavorites: Array.isArray(state.externalFavorites)
         ? state.externalFavorites.filter(isExternalProductItem) as ExternalFavoriteItem[]

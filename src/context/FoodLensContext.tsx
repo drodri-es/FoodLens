@@ -43,6 +43,8 @@ interface FoodLensContextType {
   addToHistory: (product: Product) => void;
   removeFromHistory: (productId: string) => void;
   clearHistory: () => void;
+  removeExternalHistory: (barcode: string) => void;
+  clearExternalHistory: () => void;
   
   // Favorites
   favorites: FavoriteItem[];
@@ -276,6 +278,10 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             message: 'Escanea un producto diferente para completar la comparación.',
           };
         }
+        setExternalHistory(previous => [
+          { product: result.product, scannedAt: new Date().toISOString() },
+          ...previous.filter(item => item.product.barcode !== result.product.barcode),
+        ].slice(0, 50));
         setExternalComparisonProducts([first, result.product]);
         closeScanner();
         setIsComparingOpen(true);
@@ -284,7 +290,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCurrentProduct(null);
       setCurrentExternalProduct(result.product);
       setExternalHistory(previous => [
-        { product: result.product, scannedAt: 'Ahora mismo' },
+        { product: result.product, scannedAt: new Date().toISOString() },
         ...previous.filter(item => item.product.barcode !== result.product.barcode),
       ].slice(0, 50));
       closeScanner();
@@ -313,6 +319,16 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const clearHistory = () => {
     setHistory([]);
     showToast('Historial vaciado');
+  };
+
+  const removeExternalHistory = (barcode: string) => {
+    setExternalHistory(previous => previous.filter(item => item.product.barcode !== barcode));
+    showToast('Producto eliminado del historial');
+  };
+
+  const clearExternalHistory = () => {
+    setExternalHistory([]);
+    showToast('Historial de escaneos vaciado');
   };
 
   const toggleFavorite = (productId: string, listId = 'habituales') => {
@@ -501,6 +517,8 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addToHistory,
         removeFromHistory,
         clearHistory,
+        removeExternalHistory,
+        clearExternalHistory,
         favorites,
         toggleFavorite,
         isFavorite,

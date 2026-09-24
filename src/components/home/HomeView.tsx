@@ -1,28 +1,25 @@
 import React from 'react';
 import { useFoodLens } from '../../context/FoodLensContext';
-import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
+import { ScoreBadge } from '../ui/ScoreBadges';
 import { DataOriginBadge, DemoDataNotice } from '../ui/DataOrigin';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
+import { formatScanDate } from '../../domain/history/externalHistory';
 import { 
   Scan, 
   Scale, 
   Heart, 
   ShoppingBag, 
   Search, 
-  Sparkles, 
   ChevronRight, 
-  Flame, 
   MessageSquare
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
   const { 
     openScanner, 
-    history, 
     externalHistory,
     externalFavorites,
     openExternalProduct,
-    openProductById, 
     setActiveTab, 
     openCompareModal,
     openAssistant,
@@ -129,13 +126,20 @@ export const HomeView: React.FC = () => {
           </section>
         )}
 
-        {externalHistory.length > 0 && (
-          <section>
+        <section>
             <div className="flex items-center justify-between px-1 mb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Tus escaneos reales</h3>
               <DataOriginBadge kind="source" label="Open Food Facts" />
             </div>
-            <div className="space-y-2.5">
+            {externalHistory.length === 0 ? (
+              <div className="bg-white rounded-3xl p-6 text-center border border-stone-200/70">
+                <p className="text-xs text-stone-500 mb-3">Tu historial aparecerá aquí después de escanear un producto.</p>
+                <button onClick={openScanner} className="text-xs font-bold text-emerald-700 hover:underline">
+                  Escanear mi primer producto
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
               {externalHistory.slice(0, 4).map(item => {
                 const score = calculateFoodLensScore(item.product);
                 return (
@@ -152,7 +156,7 @@ export const HomeView: React.FC = () => {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {item.scannedAt}</span>
+                    <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {formatScanDate(item.scannedAt)}</span>
                     <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
                     {score
                       ? <ScoreBadge score={score.overall} label="Experimental" size="sm" />
@@ -162,9 +166,9 @@ export const HomeView: React.FC = () => {
                 </button>
                 );
               })}
-            </div>
+              </div>
+            )}
           </section>
-        )}
 
         <DemoDataNotice />
 
@@ -211,66 +215,6 @@ export const HomeView: React.FC = () => {
               <span className="text-[11px] font-semibold text-stone-800 leading-tight">Favoritos</span>
             </button>
           </div>
-        </div>
-
-        {/* 3. Escaneos recientes */}
-        <div>
-          <div className="flex items-center justify-between px-1 mb-2.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">
-              Escaneos recientes
-            </h3>
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="text-xs font-semibold text-emerald-700 hover:underline"
-            >
-              Ver todos
-            </button>
-          </div>
-
-          {history.length === 0 ? (
-            <div className="bg-white rounded-3xl p-6 text-center border border-stone-200/70">
-              <p className="text-xs text-stone-500 mb-3">Tu historial aparecerá aquí.</p>
-              <button
-                onClick={openScanner}
-                className="text-xs font-bold text-emerald-700 hover:underline"
-              >
-                Escanear mi primer producto
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {history.slice(0, 4).map((item, idx) => (
-                <div
-                  key={`${item.product.id}-${idx}`}
-                  onClick={() => openProductById(item.product.id)}
-                  className="bg-white rounded-3xl p-3.5 border border-stone-200/70 shadow-xs flex items-center justify-between gap-3 hover:border-emerald-300 transition-colors cursor-pointer active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-14 h-14 rounded-2xl bg-stone-50 border border-stone-200/50 p-1 flex items-center justify-center shrink-0">
-                      <img
-                        src={item.product.imageUrl}
-                        alt={item.product.name}
-                        className="w-full h-full object-contain mix-blend-multiply"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] text-stone-400 font-medium block truncate">
-                        {item.product.brand} · {item.scannedAt}
-                      </span>
-                      <h4 className="font-bold text-xs text-stone-900 truncate">
-                        {item.product.name}
-                      </h4>
-                      <div className="mt-1">
-                        <ScoreBadge score={item.product.score} label={item.product.scoreLabel} size="sm" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <ChevronRight className="w-4 h-4 text-stone-400 shrink-0" />
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* 5. "Pregúntale a FoodLens" smart helper card */}

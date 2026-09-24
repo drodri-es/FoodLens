@@ -90,6 +90,7 @@ test('migrates legacy demo state without presenting fixtures as user activity', 
   assert.equal(restored.userGoals, undefined);
   assert.equal(restored.userAccount, undefined);
   assert.equal(restored.externalHistory?.[0].product.barcode, '3017620422003');
+  assert.equal(restored.externalHistory?.[0].scannedAt, '2026-09-25T00:00:00.000Z');
 });
 
 test('ignores corrupt and unsupported stored state', () => {

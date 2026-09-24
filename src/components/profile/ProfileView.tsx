@@ -3,6 +3,7 @@ import { useFoodLens } from '../../context/FoodLensContext';
 import { HEALTH_GOALS, DIETARY_PREFERENCES } from '../../data/mockProducts';
 import { HealthGoal, DietaryPreference } from '../../types/foodlens';
 import { DemoDataNotice, DataOriginBadge } from '../ui/DataOrigin';
+import { filterExternalHistory, formatScanDate, groupExternalHistory } from '../../domain/history/externalHistory';
 import { 
   User, 
   Target, 
@@ -18,7 +19,10 @@ import {
   LogOut,
   LogIn,
   Check,
-  Plus
+  Plus,
+  Search,
+  Trash2,
+  Scale
 } from 'lucide-react';
 
 export const ProfileView: React.FC = () => {
@@ -36,7 +40,13 @@ export const ProfileView: React.FC = () => {
     favorites,
     favoriteLists,
     history,
+    basket,
     openProductById,
+    externalHistory,
+    openExternalProduct,
+    removeExternalHistory,
+    clearExternalHistory,
+    startExternalComparison,
     showToast
   } = useFoodLens();
 
@@ -44,6 +54,9 @@ export const ProfileView: React.FC = () => {
   const [newListName, setNewListName] = useState<string>('');
   const [showAddList, setShowAddList] = useState<boolean>(false);
   const [selectedFavList, setSelectedFavList] = useState<string>('todos');
+  const [historyQuery, setHistoryQuery] = useState<string>('');
+  const filteredHistory = filterExternalHistory(externalHistory, historyQuery);
+  const groupedHistory = groupExternalHistory(filteredHistory);
 
   return (
     <div className="min-h-full bg-stone-100 pb-28 text-stone-900">
@@ -168,7 +181,7 @@ export const ProfileView: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-stone-400">{history.length}</span>
+                  <span className="text-xs font-bold text-stone-400">{externalHistory.length}</span>
                   <ChevronRight className="w-4 h-4 text-stone-400" />
                 </div>
               </button>
@@ -348,8 +361,8 @@ export const ProfileView: React.FC = () => {
             ) : (
               <div className="space-y-2.5">
                 {favorites.map(fav => {
-                  const product = useFoodLens().history.find(h => h.product.id === fav.productId)?.product ||
-                    useFoodLens().basket.find(b => b.product.id === fav.productId)?.product;
+                  const product = history.find(h => h.product.id === fav.productId)?.product ||
+                    basket.find(b => b.product.id === fav.productId)?.product;
                   if (!product) return null;
                   return (
                     <div
@@ -379,32 +392,86 @@ export const ProfileView: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-extrabold text-stone-900">Historial de escaneos</h2>
-                <span className="text-xs text-stone-500">Orden cronológico</span>
+                <span className="text-xs text-stone-500">{externalHistory.length} productos guardados en este dispositivo</span>
               </div>
+              {externalHistory.length > 0 && (
+                <button
+                  onClick={clearExternalHistory}
+                  className="text-[11px] font-bold text-red-600 hover:text-red-700"
+                >
+                  Borrar todo
+                </button>
+              )}
             </div>
 
-            {history.length === 0 ? (
+            {externalHistory.length > 0 && (
+              <label className="relative block">
+                <Search className="absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-stone-400" />
+                <input
+                  value={historyQuery}
+                  onChange={event => setHistoryQuery(event.target.value)}
+                  placeholder="Buscar por producto, marca o código"
+                  className="w-full rounded-2xl border border-stone-200 bg-white py-3 pl-10 pr-4 text-xs outline-none focus:border-emerald-400"
+                />
+              </label>
+            )}
+
+            {externalHistory.length === 0 ? (
               <div className="bg-white rounded-3xl p-8 text-center border border-stone-200/70">
                 <History className="w-10 h-10 text-stone-300 mx-auto mb-2" />
                 <p className="text-xs text-stone-500">Aún no has escaneado ningún producto.</p>
               </div>
+            ) : filteredHistory.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 text-center border border-stone-200/70">
+                <Search className="w-9 h-9 text-stone-300 mx-auto mb-2" />
+                <p className="text-xs text-stone-500">No hay resultados para “{historyQuery}”.</p>
+              </div>
             ) : (
-              <div className="space-y-2.5">
-                {history.map((h, i) => (
-                  <div
-                    key={`${h.product.id}-${i}`}
-                    onClick={() => openProductById(h.product.id)}
-                    className="bg-white rounded-2xl p-3 border border-stone-200/70 flex items-center justify-between cursor-pointer hover:border-emerald-300"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img src={h.product.imageUrl} alt={h.product.name} className="w-10 h-10 object-contain rounded-lg" />
-                      <div>
-                        <span className="font-bold text-xs text-stone-900 block">{h.product.name}</span>
-                        <span className="text-[10px] text-stone-400">{h.scannedAt}</span>
+              <div className="space-y-5">
+                {groupedHistory.map(group => (
+                  <section key={group.id} className="space-y-2">
+                    <h3 className="px-1 text-[11px] font-black uppercase tracking-wider text-stone-400">{group.label}</h3>
+                    {group.items.map(item => (
+                      <div
+                        key={item.product.barcode}
+                        className="bg-white rounded-2xl p-3 border border-stone-200/70 flex items-center gap-3 hover:border-emerald-300"
+                      >
+                        <button
+                          onClick={() => openExternalProduct(item.product)}
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                        >
+                          <div className="w-11 h-11 rounded-xl bg-stone-50 border border-stone-100 flex items-center justify-center shrink-0 overflow-hidden">
+                            {item.product.imageUrl ? (
+                              <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-contain" />
+                            ) : (
+                              <History className="w-4 h-4 text-stone-300" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-bold text-xs text-stone-900 block truncate">{item.product.name}</span>
+                            <span className="text-[10px] text-stone-400 block truncate">
+                              {item.product.brand || item.product.barcode} · {formatScanDate(item.scannedAt)}
+                            </span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => startExternalComparison(item.product)}
+                          className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0"
+                          aria-label={`Comparar ${item.product.name}`}
+                          title="Comparar con otro producto"
+                        >
+                          <Scale className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => removeExternalHistory(item.product.barcode)}
+                          className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0"
+                          aria-label={`Eliminar ${item.product.name} del historial`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-stone-400" />
-                  </div>
+                    ))}
+                  </section>
                 ))}
               </div>
             )}
