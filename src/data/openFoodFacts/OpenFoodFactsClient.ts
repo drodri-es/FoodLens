@@ -32,7 +32,7 @@ export class OpenFoodFactsClient {
     const response = await this.fetcher(url, {
       headers: {
         Accept: 'application/json',
-        'X-OpenFoodFacts-User-Agent': 'FoodLens/0.0.0 (web application)',
+        'X-User-Agent': 'FoodLens/0.0.0 (web application)',
       },
       signal,
     });

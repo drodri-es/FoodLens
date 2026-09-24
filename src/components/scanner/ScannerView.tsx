@@ -3,6 +3,7 @@ import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { BarcodeScanner, ScannerEngine } from '../../services/scanner/BarcodeScanner';
 import { createBarcodeScanner } from '../../services/scanner/createBarcodeScanner';
+import { DetectionStabilizer } from '../../services/scanner/DetectionStabilizer';
 import { DataOriginBadge } from '../ui/DataOrigin';
 import { 
   X, 
@@ -26,6 +27,9 @@ export const ScannerView: React.FC = () => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scannerEngine, setScannerEngine] = useState<ScannerEngine | null>(null);
   const [scannerError, setScannerError] = useState<string>('');
+  const [lookupError, setLookupError] = useState<string>('');
+  const [detectedCode, setDetectedCode] = useState<string>('');
+  const [detectionHint, setDetectionHint] = useState<string>('');
   const [isStartingCamera, setIsStartingCamera] = useState<boolean>(false);
   const [torchOn, setTorchOn] = useState<boolean>(false);
   const [analyzing, setAnalyzing] = useState<boolean>(false);
@@ -44,6 +48,9 @@ export const ScannerView: React.FC = () => {
   const scannerRef = useRef<BarcodeScanner | null>(null);
   const analyzingRef = useRef<boolean>(false);
   const detectedHandlerRef = useRef<(code: string) => void>(() => undefined);
+  const cameraAuthorizedRef = useRef<boolean>(false);
+  const startingCameraRef = useRef<boolean>(false);
+  const stabilizerRef = useRef(new DetectionStabilizer());
 
   // Play gentle beep using Web Audio API
   const playBeep = () => {
@@ -86,24 +93,15 @@ export const ScannerView: React.FC = () => {
     closeScanner();
   };
 
-  useEffect(() => {
-    if (!isScannerOpen) {
-      stopScanner();
-      setHasPermission(null);
-      setScannerError('');
-      setScannerEngine(null);
-    }
-
-    return () => {
-      if (!isScannerOpen) stopScanner();
-    };
-  }, [isScannerOpen]);
-
   useEffect(() => () => stopScanner(), []);
 
   // Start the native detector when possible and ZXing everywhere else.
   const requestCamera = async () => {
+    if (startingCameraRef.current || scannerRef.current) return;
+    startingCameraRef.current = true;
     setScannerError('');
+    setLookupError('');
+    setDetectionHint('');
     setIsStartingCamera(true);
     setHasPermission(true);
 
@@ -114,46 +112,84 @@ export const ScannerView: React.FC = () => {
       const scanner = await createBarcodeScanner();
       scannerRef.current = scanner;
       await scanner.start(videoRef.current, code => detectedHandlerRef.current(code));
+      cameraAuthorizedRef.current = true;
       setScannerEngine(scanner.engine);
     } catch (error) {
       stopScanner();
       setHasPermission(false);
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        cameraAuthorizedRef.current = false;
+      }
       setScannerError(
         error instanceof DOMException && error.name === 'NotAllowedError'
           ? 'No se ha concedido permiso para usar la cámara.'
           : 'No hemos podido iniciar la cámara en este dispositivo.',
       );
     } finally {
+      startingCameraRef.current = false;
       setIsStartingCamera(false);
     }
   };
 
+  useEffect(() => {
+    if (!isScannerOpen) {
+      stopScanner();
+      setLookupError('');
+      setDetectedCode('');
+      setDetectionHint('');
+      stabilizerRef.current.reset();
+      if (!cameraAuthorizedRef.current) {
+        setHasPermission(null);
+        setScannerEngine(null);
+      }
+      return;
+    }
+
+    if (cameraAuthorizedRef.current && hasPermission !== false) {
+      void requestCamera();
+    }
+  }, [isScannerOpen]);
+
   // Process barcode scan
+  const lookupBarcode = async (code: string) => {
+    analyzingRef.current = true;
+    setLookupError('');
+    setDetectedCode(code);
+    setAnalyzing(true);
+
+    const res = await scanBarcode(code);
+    analyzingRef.current = false;
+    setAnalyzing(false);
+
+    if (!res.found) {
+      if (res.reason === 'unavailable') {
+        setLookupError('No se pudo consultar Open Food Facts. La cámara está bien; comprueba la conexión y reintenta la consulta.');
+        return;
+      }
+      setMissingBarcode(code);
+      setNotFoundFlow(true);
+    }
+  };
+
   const handleBarcodeDetected = (code: string) => {
     if (analyzingRef.current) return;
     analyzingRef.current = true;
     stopScanner();
     playBeep();
     triggerVibrate();
-    setAnalyzing(true);
-
-    setTimeout(async () => {
-      analyzingRef.current = false;
-      setAnalyzing(false);
-      const res = await scanBarcode(code);
-      if (!res.found) {
-        if (res.reason === 'unavailable') {
-          setHasPermission(false);
-          setScannerError('No se pudo consultar Open Food Facts. Comprueba tu conexión e inténtalo de nuevo.');
-          return;
-        }
-        setMissingBarcode(code);
-        setNotFoundFlow(true);
-      }
-    }, 700);
+    void lookupBarcode(code);
   };
 
-  detectedHandlerRef.current = handleBarcodeDetected;
+  detectedHandlerRef.current = rawCode => {
+    if (analyzingRef.current) return;
+    const stableCode = stabilizerRef.current.push(rawCode);
+    if (!stableCode) {
+      setDetectionHint('Código detectado · mantén el envase quieto');
+      return;
+    }
+    setDetectionHint('');
+    handleBarcodeDetected(stableCode);
+  };
 
   const toggleTorch = async () => {
     const nextValue = !torchOn;
@@ -174,6 +210,7 @@ export const ScannerView: React.FC = () => {
     e.preventDefault();
     if (!manualCodeInput.trim()) return;
     setManualCodeModal(false);
+    stabilizerRef.current.reset();
     handleBarcodeDetected(manualCodeInput.trim());
     setManualCodeInput('');
   };
@@ -280,6 +317,39 @@ export const ScannerView: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-stone-900/60 via-stone-950/20 to-stone-950/80 pointer-events-none" />
           </div>
 
+          {lookupError && (
+            <div className="absolute inset-0 z-40 bg-stone-950/95 flex items-center justify-center p-6">
+              <div className="w-full max-w-sm text-center">
+                <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-lg font-bold text-white mb-2">No pudimos consultar el producto</h2>
+                <p className="text-sm text-stone-400 leading-relaxed mb-2">{lookupError}</p>
+                <p className="text-xs text-stone-500 font-mono mb-6">Código: {detectedCode}</p>
+                <button
+                  onClick={() => void lookupBarcode(detectedCode)}
+                  className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm mb-3"
+                >
+                  Reintentar consulta
+                </button>
+                <button
+                  onClick={() => {
+                    setLookupError('');
+                    setDetectedCode('');
+                    void requestCamera();
+                  }}
+                  className="w-full h-12 rounded-2xl bg-stone-800 text-white font-semibold text-sm mb-3"
+                >
+                  Volver a escanear
+                </button>
+                <button
+                  onClick={handleCloseScanner}
+                  className="text-xs text-stone-400 py-2"
+                >
+                  Cerrar escáner
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Top Bar Controls */}
           <div className="relative z-20 flex items-center justify-between px-5 pt-8 pb-4">
             <button
@@ -342,7 +412,7 @@ export const ScannerView: React.FC = () => {
               Centra el código de barras dentro del recuadro
             </p>
             <span className="text-[11px] text-stone-400 mt-2 text-center">
-              Compatible con EAN, UPC, QR y GS1 Digital Link
+              {detectionHint || 'Compatible con EAN, UPC, QR y GS1 Digital Link'}
             </span>
 
             {/* Test controls are never included in production builds. */}
