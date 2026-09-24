@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Database, Heart, Info, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Database, Heart, Info, Scale, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { DataOriginBadge } from '../ui/DataOrigin';
@@ -11,6 +11,7 @@ interface ExternalProductViewProps {
   onBack: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onCompare: () => void;
 }
 
 const nutritionLabels: Array<[keyof FoodLensProduct['nutrition'], string, string]> = [
@@ -29,6 +30,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
   onBack,
   isFavorite,
   onToggleFavorite,
+  onCompare,
 }) => {
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
   const score = calculateFoodLensScore(product);
@@ -80,6 +82,13 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           <p className="text-xs text-stone-500 mt-1">
             {[product.quantity, product.barcode].filter(Boolean).join(' · ')}
           </p>
+          <button
+            onClick={onCompare}
+            className="w-full h-11 mt-4 rounded-2xl bg-stone-900 text-white text-xs font-bold flex items-center justify-center gap-2"
+          >
+            <Scale className="w-4 h-4" />
+            Comparar con otro producto
+          </button>
         </section>
 
         <section className="bg-white rounded-3xl border border-stone-200 p-5 space-y-4">

@@ -20,6 +20,8 @@ la definición de producto marca la dirección de desarrollo.
   pruebas automatizadas, CI y limitaciones pendientes.
 - [Auditoría de afirmaciones nutricionales](./NUTRITION_CLAIMS_AUDIT.md): criterios,
   correcciones, fuentes y control automático de lenguaje no respaldado.
+- [Comparación de productos reales](./COMPARISON.md): flujo, datos comparados y
+  reglas neutrales para calcular diferencias.
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

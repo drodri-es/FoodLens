@@ -168,6 +168,10 @@ export const ScannerView: React.FC = () => {
         );
         return;
       }
+      if (res.reason === 'invalid-code') {
+        setLookupError(res.message ?? 'El código leído no es un EAN, UPC o GS1 válido.');
+        return;
+      }
       setMissingBarcode(code);
       setNotFoundFlow(true);
     }

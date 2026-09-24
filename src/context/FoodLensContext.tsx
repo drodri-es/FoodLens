@@ -67,6 +67,9 @@ interface FoodLensContextType {
   isComparingOpen: boolean;
   openCompareModal: () => void;
   closeCompareModal: () => void;
+  externalComparisonProducts: FoodLensProduct[];
+  startExternalComparison: (product: FoodLensProduct) => void;
+  clearExternalComparison: () => void;
   
   // User Goals & Preferences
   userGoals: HealthGoal[];
@@ -118,6 +121,7 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [currentExternalProduct, setCurrentExternalProduct] = useState<FoodLensProduct | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [isComparingOpen, setIsComparingOpen] = useState<boolean>(false);
+  const [externalComparisonProducts, setExternalComparisonProducts] = useState<FoodLensProduct[]>([]);
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState<boolean>(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
@@ -263,6 +267,20 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const result = await productRepository.findByBarcode(trimmed);
     if (result.status === 'found') {
+      if (externalComparisonProducts.length === 1) {
+        const first = externalComparisonProducts[0];
+        if (first.barcode === result.product.barcode) {
+          return {
+            found: false,
+            reason: 'invalid-code' as const,
+            message: 'Escanea un producto diferente para completar la comparación.',
+          };
+        }
+        setExternalComparisonProducts([first, result.product]);
+        closeScanner();
+        setIsComparingOpen(true);
+        return { found: true, externalProduct: result.product };
+      }
       setCurrentProduct(null);
       setCurrentExternalProduct(result.product);
       setExternalHistory(previous => [
@@ -390,6 +408,18 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const openCompareModal = () => setIsComparingOpen(true);
   const closeCompareModal = () => setIsComparingOpen(false);
 
+  const startExternalComparison = (product: FoodLensProduct) => {
+    setExternalComparisonProducts([product]);
+    setCurrentExternalProduct(null);
+    setIsScannerOpen(true);
+    showToast('Escanea ahora el segundo producto', 'info');
+  };
+
+  const clearExternalComparison = () => {
+    setExternalComparisonProducts([]);
+    setIsComparingOpen(false);
+  };
+
   const toggleGoal = (goal: HealthGoal) => {
     setUserGoals(prev => {
       if (prev.includes(goal)) {
@@ -489,6 +519,9 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isComparingOpen,
         openCompareModal,
         closeCompareModal,
+        externalComparisonProducts,
+        startExternalComparison,
+        clearExternalComparison,
         userGoals,
         toggleGoal,
         setGoals,

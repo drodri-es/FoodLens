@@ -3,6 +3,7 @@ import { useFoodLens } from '../../context/FoodLensContext';
 import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { ScoreBadge, NovaBadge } from '../ui/ScoreBadges';
 import { DemoDataNotice } from '../ui/DataOrigin';
+import { ExternalComparisonView } from './ExternalComparisonView';
 import { 
   X, 
   Plus, 
@@ -23,12 +24,18 @@ export const ComparisonView: React.FC = () => {
     addToCompare,
     addToBasket,
     openProductById,
-    userGoals
+    userGoals,
+    externalComparisonProducts,
+    clearExternalComparison,
   } = useFoodLens();
 
   const [addSelectorOpen, setAddSelectorOpen] = useState<boolean>(false);
 
   if (!isComparingOpen) return null;
+
+  if (externalComparisonProducts.length > 0) {
+    return <ExternalComparisonView products={externalComparisonProducts} onClose={clearExternalComparison} />;
+  }
 
   const comparedProducts = comparisonProductIds
     .map(id => MOCK_PRODUCTS.find(p => p.id === id))

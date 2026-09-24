@@ -23,6 +23,7 @@ export const MobileShell: React.FC = () => {
     closeProductDetail, 
     toggleExternalFavorite,
     isExternalFavorite,
+    startExternalComparison,
     toast 
   } = useFoodLens();
 
@@ -38,6 +39,7 @@ export const MobileShell: React.FC = () => {
               onBack={closeProductDetail}
               isFavorite={isExternalFavorite(currentExternalProduct.barcode)}
               onToggleFavorite={() => toggleExternalFavorite(currentExternalProduct)}
+              onCompare={() => startExternalComparison(currentExternalProduct)}
             />
           ) : currentProduct ? (
             <ProductDetailView 

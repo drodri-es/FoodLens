@@ -40,6 +40,7 @@ El comando `npm test` utiliza el runner nativo de Node y `tsx`. Cubre:
 - producto encontrado, no encontrado e indisponibilidad;
 - reutilización de la caché persistente;
 - persistencia y validación de favoritos reales;
+- diferencias entre dos productos reales y tratamiento de valores ausentes;
 - serialización, restauración, versión desconocida y datos corruptos.
 
 Las pruebas no realizan llamadas reales a servicios externos.
