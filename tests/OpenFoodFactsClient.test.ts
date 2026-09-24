@@ -2,6 +2,27 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { OpenFoodFactsClient } from '../src/data/openFoodFacts/OpenFoodFactsClient';
 
+test('invokes the default fetch with the global object as its receiver', async () => {
+  const originalFetch = globalThis.fetch;
+  let receiver: unknown;
+
+  globalThis.fetch = function (this: unknown) {
+    receiver = this;
+    return Promise.resolve(new Response(JSON.stringify({ status: 'failure' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    }));
+  } as typeof fetch;
+
+  try {
+    const client = new OpenFoodFactsClient();
+    await client.getProduct('0000000000000');
+    assert.equal(receiver, globalThis);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('uses a simple browser request that does not trigger a CORS preflight', async () => {
   let requestedUrl = '';
   let requestedInit: RequestInit | undefined;

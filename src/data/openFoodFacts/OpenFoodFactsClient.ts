@@ -23,7 +23,7 @@ const PRODUCT_FIELDS = [
 
 export class OpenFoodFactsClient {
   constructor(
-    private readonly fetcher: typeof fetch = fetch,
+    private readonly fetcher: typeof fetch = globalThis.fetch.bind(globalThis),
     private readonly baseUrl = DEFAULT_BASE_URL,
   ) {}
 
