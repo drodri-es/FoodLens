@@ -6,7 +6,7 @@
 ## Persistencia local
 
 El modo invitado utiliza almacenamiento local versionado bajo
-`foodlens:app-state`. Se guardan:
+`foodlens:app-state` (versión 2). Se guardan:
 
 - historial de productos demo mediante identificadores;
 - historial de productos reales normalizados;
@@ -19,6 +19,11 @@ El modo invitado utiliza almacenamiento local versionado bajo
 
 Los productos demo se reconstruyen contra el catálogo actual para no conservar
 copias obsoletas. Los identificadores que ya no existen se descartan.
+
+Una instalación nueva comienza en modo invitado, sin historial, favoritos,
+cesta, comparativa ni objetivos precargados. La migración desde la versión 1
+descarta la actividad ficticia anterior y conserva los escaneos y favoritos
+reales procedentes de Open Food Facts.
 
 La caché de Open Food Facts utiliza claves `foodlens:product-cache:v2:<barcode>` y
 caduca a los 30 minutos. Una caché llena, corrupta o no disponible no impide

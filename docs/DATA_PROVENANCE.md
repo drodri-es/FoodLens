@@ -28,6 +28,9 @@ utiliza el componente `DataOriginBadge` con estas categorías:
 
 - Las pantallas alimentadas por `MOCK_PRODUCTS` muestran un aviso de modo
   demostración.
+- Los mocks no se precargan como historial, favoritos, cesta, comparativa ni
+  identidad del usuario; en producción un código escaneado siempre se consulta
+  mediante la capa de datos real.
 - Las fichas mock identifican su fuente como ficticia y no verificada.
 - Las fichas obtenidas mediante la API identifican Open Food Facts como fuente.
 - La completitud se identifica como un cálculo estructural de FoodLens.

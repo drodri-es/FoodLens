@@ -123,24 +123,11 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'mobile-frame' | 'fluid'>('mobile-frame');
 
-  // Initial state with defaults
-  const [history, setHistory] = useState<HistoryItem[]>(() => {
-    if (persistedState.history) return persistedState.history;
-    // Start with 3 sample scanned products to show recent scans immediately
-    return [
-      { product: MOCK_PRODUCTS[0], scannedAt: 'Hoy, 10:24' },
-      { product: MOCK_PRODUCTS[3], scannedAt: 'Hoy, 09:12' },
-      { product: MOCK_PRODUCTS[4], scannedAt: 'Ayer, 18:40' },
-      { product: MOCK_PRODUCTS[5], scannedAt: '18 sep, 14:15' },
-    ];
-  });
+  const [history, setHistory] = useState<HistoryItem[]>(persistedState.history ?? []);
   const [externalHistory, setExternalHistory] = useState<ExternalHistoryItem[]>(persistedState.externalHistory ?? []);
   const [externalFavorites, setExternalFavorites] = useState<ExternalFavoriteItem[]>(persistedState.externalFavorites ?? []);
 
-  const [favorites, setFavorites] = useState<FavoriteItem[]>(persistedState.favorites ?? [
-    { productId: MOCK_PRODUCTS[0].id, listId: 'desayuno', addedAt: 'Ayer' },
-    { productId: MOCK_PRODUCTS[3].id, listId: 'habituales', addedAt: '19 sep' },
-  ]);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>(persistedState.favorites ?? []);
 
   const [favoriteLists, setFavoriteLists] = useState<Array<{ id: string; name: string }>>(persistedState.favoriteLists ?? [
     { id: 'habituales', name: 'Habituales' },
@@ -150,23 +137,13 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     { id: 'semanal', name: 'Compra semanal' },
   ]);
 
-  const [basket, setBasket] = useState<BasketItem[]>(persistedState.basket ?? [
-    { product: MOCK_PRODUCTS[0], quantity: 1, addedAt: 'Hoy' }, // Cereales Choco Crunch (can be swapped!)
-    { product: MOCK_PRODUCTS[3], quantity: 2, addedAt: 'Hoy' }, // Yogur Griego
-    { product: MOCK_PRODUCTS[7], quantity: 1, addedAt: 'Ayer' }, // Pizza 4 quesos
-  ]);
+  const [basket, setBasket] = useState<BasketItem[]>(persistedState.basket ?? []);
 
-  const [userGoals, setUserGoals] = useState<HealthGoal[]>(persistedState.userGoals ?? [
-    'reduce_sugar',
-    'increase_fiber',
-  ]);
+  const [userGoals, setUserGoals] = useState<HealthGoal[]>(persistedState.userGoals ?? []);
 
   const [dietaryPreferences, setDietaryPreferences] = useState<DietaryPreference[]>(persistedState.dietaryPreferences ?? []);
 
-  const [comparisonProductIds, setComparisonProductIds] = useState<string[]>(persistedState.comparisonProductIds ?? [
-    MOCK_PRODUCTS[0].id,
-    MOCK_PRODUCTS[1].id
-  ]);
+  const [comparisonProductIds, setComparisonProductIds] = useState<string[]>(persistedState.comparisonProductIds ?? []);
 
   const [userAccount, setUserAccount] = useState<{
     name: string;
@@ -174,10 +151,9 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     isGuest: boolean;
     avatar?: string;
   }>(persistedState.userAccount ?? {
-    name: 'David Rodríguez',
-    email: 'drodri@gmail.com',
-    isGuest: false,
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
+    name: 'Usuario Invitado',
+    email: '',
+    isGuest: true,
   });
 
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(() => {
@@ -274,7 +250,9 @@ export const FoodLensProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const scanBarcode = async (code: string) => {
     const trimmed = code.trim();
-    const found = MOCK_PRODUCTS.find(p => p.barcode === trimmed || p.id.includes(trimmed.toLowerCase()));
+    const found = import.meta.env.DEV
+      ? MOCK_PRODUCTS.find(p => p.barcode === trimmed || p.id.includes(trimmed.toLowerCase()))
+      : undefined;
     if (found) {
       setCurrentExternalProduct(null);
       setCurrentProduct(found);

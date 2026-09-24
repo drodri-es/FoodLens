@@ -12,7 +12,6 @@ import {
   Sparkles, 
   ChevronRight, 
   Flame, 
-  TrendingDown,
   MessageSquare
 } from 'lucide-react';
 
@@ -214,24 +213,7 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. "Esta semana" Weekly Insight Card */}
-        <div className="bg-gradient-to-br from-emerald-50/90 via-white to-stone-50 rounded-3xl p-4 border border-emerald-200/60 shadow-xs flex items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
-              <TrendingDown className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
-                Esta semana
-              </span>
-              <p className="text-xs text-stone-800 font-medium leading-snug mt-0.5">
-                Has elegido <strong>3 productos con menos azúcar</strong> que tus alternativas habituales.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Escaneos recientes */}
+        {/* 3. Escaneos recientes */}
         <div>
           <div className="flex items-center justify-between px-1 mb-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">

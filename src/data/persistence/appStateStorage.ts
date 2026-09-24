@@ -9,7 +9,7 @@ import {
 import { ExternalFavoriteItem, ExternalHistoryItem, FoodLensProduct } from '../../domain/product/FoodLensProduct';
 
 const STORAGE_KEY = 'foodlens:app-state';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export interface PersistedUserAccount {
   name: string;
@@ -18,8 +18,8 @@ export interface PersistedUserAccount {
   avatar?: string;
 }
 
-interface PersistedAppStateV1 {
-  version: 1;
+interface PersistedAppState {
+  version: 1 | 2;
   history: Array<{ productId: string; scannedAt: string }>;
   externalHistory?: ExternalHistoryItem[];
   externalFavorites?: ExternalFavoriteItem[];
@@ -74,13 +74,14 @@ export function loadAppState(
     const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || parsed.version !== STORAGE_VERSION) return {};
+    if (!isRecord(parsed) || (parsed.version !== 1 && parsed.version !== STORAGE_VERSION)) return {};
 
-    const state = parsed as unknown as PersistedAppStateV1;
+    const state = parsed as unknown as PersistedAppState;
+    const isLegacyDemoState = state.version === 1;
     const productsById = new Map(products.map(product => [product.id, product]));
 
     return {
-      history: Array.isArray(state.history)
+      history: !isLegacyDemoState && Array.isArray(state.history)
         ? state.history.flatMap(item => {
             const product = isRecord(item) && typeof item.productId === 'string'
               ? productsById.get(item.productId)
@@ -96,13 +97,13 @@ export function loadAppState(
       externalFavorites: Array.isArray(state.externalFavorites)
         ? state.externalFavorites.filter(isExternalProductItem) as ExternalFavoriteItem[]
         : undefined,
-      favorites: Array.isArray(state.favorites)
+      favorites: !isLegacyDemoState && Array.isArray(state.favorites)
         ? state.favorites.filter(item => isRecord(item) && typeof item.productId === 'string') as FavoriteItem[]
         : undefined,
       favoriteLists: Array.isArray(state.favoriteLists)
         ? state.favoriteLists.filter(item => isRecord(item) && typeof item.id === 'string' && typeof item.name === 'string') as Array<{ id: string; name: string }>
         : undefined,
-      basket: Array.isArray(state.basket)
+      basket: !isLegacyDemoState && Array.isArray(state.basket)
         ? state.basket.flatMap(item => {
             const product = isRecord(item) && typeof item.productId === 'string'
               ? productsById.get(item.productId)
@@ -112,14 +113,14 @@ export function loadAppState(
               : [];
           })
         : undefined,
-      comparisonProductIds: Array.isArray(state.comparisonProductIds)
+      comparisonProductIds: !isLegacyDemoState && Array.isArray(state.comparisonProductIds)
         ? state.comparisonProductIds.filter(id => typeof id === 'string' && productsById.has(id))
         : undefined,
-      userGoals: Array.isArray(state.userGoals) ? state.userGoals as HealthGoal[] : undefined,
+      userGoals: !isLegacyDemoState && Array.isArray(state.userGoals) ? state.userGoals as HealthGoal[] : undefined,
       dietaryPreferences: Array.isArray(state.dietaryPreferences)
         ? state.dietaryPreferences as DietaryPreference[]
         : undefined,
-      userAccount: isRecord(state.userAccount)
+      userAccount: !isLegacyDemoState && isRecord(state.userAccount)
         && typeof state.userAccount.name === 'string'
         && typeof state.userAccount.email === 'string'
         && typeof state.userAccount.isGuest === 'boolean'
@@ -137,7 +138,7 @@ export function saveAppState(
 ): boolean {
   if (!storage) return false;
 
-  const persisted: PersistedAppStateV1 = {
+  const persisted: PersistedAppState = {
     version: STORAGE_VERSION,
     history: snapshot.history.map(item => ({
       productId: item.product.id,

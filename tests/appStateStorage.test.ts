@@ -39,7 +39,7 @@ test('persists state using product identifiers and restores current fixtures', (
 test('discards malformed external favorites', () => {
   const storage = new MemoryStorage();
   storage.setItem('foodlens:app-state', JSON.stringify({
-    version: 1,
+    version: 2,
     history: [],
     externalFavorites: [
       { product: { barcode: '123', name: 'Sin fuente' }, addedAt: 'Ahora' },
@@ -57,6 +57,39 @@ test('discards malformed external favorites', () => {
   const restored = loadAppState(storage);
   assert.equal(restored.externalFavorites?.length, 1);
   assert.equal(restored.externalFavorites?.[0].product.barcode, '456');
+});
+
+test('migrates legacy demo state without presenting fixtures as user activity', () => {
+  const storage = new MemoryStorage();
+  storage.setItem('foodlens:app-state', JSON.stringify({
+    version: 1,
+    history: [{ productId: 'product-one', scannedAt: 'Hoy' }],
+    externalHistory: [{
+      product: {
+        barcode: '3017620422003',
+        name: 'Producto real',
+        source: { provider: 'Open Food Facts', fetchedAt: '2026-09-25T00:00:00.000Z' },
+      },
+      scannedAt: 'Hoy',
+    }],
+    externalFavorites: [],
+    favorites: [{ productId: 'product-one', listId: 'habituales', addedAt: 'Hoy' }],
+    favoriteLists: [{ id: 'habituales', name: 'Habituales' }],
+    basket: [{ productId: 'product-one', quantity: 1, addedAt: 'Hoy' }],
+    comparisonProductIds: ['product-one'],
+    userGoals: ['reduce_sugar'],
+    dietaryPreferences: [],
+    userAccount: { name: 'David Rodríguez', email: 'demo@example.com', isGuest: false },
+  }));
+
+  const restored = loadAppState(storage, [{ id: 'product-one' } as Product]);
+  assert.equal(restored.history, undefined);
+  assert.equal(restored.favorites, undefined);
+  assert.equal(restored.basket, undefined);
+  assert.equal(restored.comparisonProductIds, undefined);
+  assert.equal(restored.userGoals, undefined);
+  assert.equal(restored.userAccount, undefined);
+  assert.equal(restored.externalHistory?.[0].product.barcode, '3017620422003');
 });
 
 test('ignores corrupt and unsupported stored state', () => {
