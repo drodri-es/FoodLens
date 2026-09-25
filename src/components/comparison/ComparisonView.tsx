@@ -27,6 +27,7 @@ export const ComparisonView: React.FC = () => {
     userGoals,
     externalComparisonProducts,
     clearExternalComparison,
+    openScanner,
   } = useFoodLens();
 
   const [addSelectorOpen, setAddSelectorOpen] = useState<boolean>(false);
@@ -34,7 +35,16 @@ export const ComparisonView: React.FC = () => {
   if (!isComparingOpen) return null;
 
   if (externalComparisonProducts.length > 0) {
-    return <ExternalComparisonView products={externalComparisonProducts} onClose={clearExternalComparison} />;
+    return (
+      <ExternalComparisonView
+        products={externalComparisonProducts}
+        onClose={clearExternalComparison}
+        onScanAnother={() => {
+          clearExternalComparison();
+          openScanner();
+        }}
+      />
+    );
   }
 
   const comparedProducts = comparisonProductIds

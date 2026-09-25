@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, X } from 'lucide-react';
+import { ScanLine, Scale, X } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { compareFoodLensProducts } from '../../domain/comparison/compareFoodLensProducts';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
@@ -9,6 +9,7 @@ import { ScoreBadge } from '../ui/ScoreBadges';
 interface ExternalComparisonViewProps {
   products: FoodLensProduct[];
   onClose: () => void;
+  onScanAnother: () => void;
 }
 
 const nutritionRows: Array<[keyof FoodLensProduct['nutrition'], string, string]> = [
@@ -27,7 +28,7 @@ const dimensionRows = [
   ['additives', 'Aditivos'],
 ] as const;
 
-export const ExternalComparisonView: React.FC<ExternalComparisonViewProps> = ({ products, onClose }) => {
+export const ExternalComparisonView: React.FC<ExternalComparisonViewProps> = ({ products, onClose, onScanAnother }) => {
   const [first, second] = products;
   const highlights = first && second ? compareFoodLensProducts(first, second) : [];
   const scores = products.map(calculateFoodLensScore);
@@ -130,6 +131,15 @@ export const ExternalComparisonView: React.FC<ExternalComparisonViewProps> = ({ 
             </>
           )}
         </main>
+        <footer className="border-t border-stone-200 bg-white p-3">
+          <button
+            onClick={onScanAnother}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-xs font-extrabold text-white"
+          >
+            <ScanLine className="h-4 w-4" />
+            Escanear otro producto
+          </button>
+        </footer>
       </div>
     </div>
   );

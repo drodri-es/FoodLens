@@ -5,6 +5,12 @@ import { BarcodeScanner, ScannerEngine } from '../../services/scanner/BarcodeSca
 import { createBarcodeScanner } from '../../services/scanner/createBarcodeScanner';
 import { DetectionStabilizer } from '../../services/scanner/DetectionStabilizer';
 import { DataOriginBadge } from '../ui/DataOrigin';
+import {
+  ContributionDraftPhoto,
+  ContributionPhotoKind,
+  getContributionDraft,
+  saveContributionDraft,
+} from '../../data/contributions/ContributionDraftRepository';
 import { 
   X, 
   Flashlight, 
@@ -16,9 +22,18 @@ import {
   AlertCircle,
   QrCode,
   ArrowRight,
-  UploadCloud,
   CheckCircle2
 } from 'lucide-react';
+
+interface CapturedPhoto extends ContributionDraftPhoto {
+  previewUrl: string;
+}
+
+const PHOTO_KIND_BY_STEP: Record<1 | 2 | 3, ContributionPhotoKind> = {
+  1: 'front',
+  2: 'ingredients',
+  3: 'nutrition',
+};
 
 export const ScannerView: React.FC = () => {
   const { isScannerOpen, closeScanner, scanBarcode, showToast } = useFoodLens();
@@ -42,7 +57,8 @@ export const ScannerView: React.FC = () => {
   const [contributeStep, setContributeStep] = useState<number>(1);
   const [contributeName, setContributeName] = useState<string>('');
   const [contributeBrand, setContributeBrand] = useState<string>('');
-  const [contributePhotos, setContributePhotos] = useState<{ [key: number]: boolean }>({});
+  const [contributePhotos, setContributePhotos] = useState<Partial<Record<1 | 2 | 3, CapturedPhoto>>>({});
+  const [isSavingDraft, setIsSavingDraft] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<BarcodeScanner | null>(null);
@@ -51,6 +67,20 @@ export const ScannerView: React.FC = () => {
   const cameraAuthorizedRef = useRef<boolean>(false);
   const startingCameraRef = useRef<boolean>(false);
   const stabilizerRef = useRef(new DetectionStabilizer());
+  const contributionPreviewUrlsRef = useRef<Set<string>>(new Set());
+
+  const clearContributionPhotos = () => {
+    contributionPreviewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    contributionPreviewUrlsRef.current.clear();
+    setContributePhotos({});
+  };
+
+  const resetContributionForm = () => {
+    clearContributionPhotos();
+    setContributeStep(1);
+    setContributeName('');
+    setContributeBrand('');
+  };
 
   // Play gentle beep using Web Audio API
   const playBeep = () => {
@@ -94,6 +124,11 @@ export const ScannerView: React.FC = () => {
   };
 
   useEffect(() => () => stopScanner(), []);
+
+  useEffect(() => () => {
+    contributionPreviewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    contributionPreviewUrlsRef.current.clear();
+  }, []);
 
   // Start the native detector when possible and ZXing everywhere else.
   const requestCamera = async () => {
@@ -172,7 +207,9 @@ export const ScannerView: React.FC = () => {
         setLookupError(res.message ?? 'El código leído no es un EAN, UPC o GS1 válido.');
         return;
       }
+      resetContributionForm();
       setMissingBarcode(code);
+      void restoreContributionDraft(code);
       setNotFoundFlow(true);
     }
   };
@@ -225,12 +262,77 @@ export const ScannerView: React.FC = () => {
     showToast('La lectura desde galería estará disponible próximamente', 'info');
   };
 
-  const completeContribution = () => {
-    showToast('Demostración completada: no se ha enviado información', 'info');
-    setNotFoundFlow(false);
-    setContributeStep(1);
-    setContributePhotos({});
-    handleCloseScanner();
+  const restoreContributionDraft = async (barcode: string) => {
+    try {
+      const draft = await getContributionDraft(barcode);
+      if (!draft) return;
+      contributionPreviewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      contributionPreviewUrlsRef.current.clear();
+      setContributeName(draft.name);
+      setContributeBrand(draft.brand);
+      setContributePhotos(Object.fromEntries(draft.photos.flatMap(photo => {
+        const entry = Object.entries(PHOTO_KIND_BY_STEP).find(([, kind]) => kind === photo.kind);
+        if (!entry) return [];
+        const step = Number(entry[0]) as 1 | 2 | 3;
+        const previewUrl = URL.createObjectURL(photo.blob);
+        contributionPreviewUrlsRef.current.add(previewUrl);
+        return [[step, { ...photo, previewUrl }]];
+      })));
+      showToast('Borrador local recuperado', 'info');
+    } catch {
+      // The contribution flow remains usable even if drafts cannot be restored.
+    }
+  };
+
+  const captureContributionPhoto = (step: 1 | 2 | 3, file?: File) => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    contributionPreviewUrlsRef.current.add(previewUrl);
+    const photo: CapturedPhoto = {
+      kind: PHOTO_KIND_BY_STEP[step],
+      blob: file,
+      fileName: file.name,
+      mimeType: file.type,
+      previewUrl,
+    };
+    setContributePhotos(previous => {
+      const previousUrl = previous[step]?.previewUrl;
+      if (previousUrl) {
+        URL.revokeObjectURL(previousUrl);
+        contributionPreviewUrlsRef.current.delete(previousUrl);
+      }
+      return { ...previous, [step]: photo };
+    });
+    showToast('Fotografía guardada en el borrador', 'success');
+  };
+
+  const completeContribution = async () => {
+    const photos = Object.values(contributePhotos).filter(
+      (photo): photo is CapturedPhoto => Boolean(photo),
+    );
+    if (photos.length < 3 || !contributeName.trim()) {
+      showToast('Completa las tres fotos y el nombre del producto', 'warning');
+      return;
+    }
+
+    setIsSavingDraft(true);
+    try {
+      await saveContributionDraft({
+        barcode: missingBarcode,
+        name: contributeName.trim(),
+        brand: contributeBrand.trim(),
+        photos: photos.map(({ previewUrl: _previewUrl, ...photo }) => photo),
+        updatedAt: new Date().toISOString(),
+      });
+      showToast('Borrador guardado en este dispositivo', 'success');
+      setNotFoundFlow(false);
+      resetContributionForm();
+      handleCloseScanner();
+    } catch {
+      showToast('No se pudo guardar el borrador en este dispositivo', 'warning');
+    } finally {
+      setIsSavingDraft(false);
+    }
   };
 
   if (!isScannerOpen) return null;
@@ -502,7 +604,11 @@ export const ScannerView: React.FC = () => {
                 <h3 className="text-lg font-bold text-white">No encontramos este producto</h3>
               </div>
               <button
-                onClick={() => setNotFoundFlow(false)}
+                onClick={() => {
+                  setNotFoundFlow(false);
+                  resetContributionForm();
+                  requestAnimationFrame(() => void requestCamera());
+                }}
                 className="w-9 h-9 rounded-full bg-stone-800 flex items-center justify-center text-stone-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
@@ -512,7 +618,7 @@ export const ScannerView: React.FC = () => {
             <p className="text-xs text-stone-400 mb-6">
               Código <span className="font-mono text-stone-200">{missingBarcode}</span> no registrado aún. Puedes ayudarnos a identificarlo en menos de un minuto.
             </p>
-            <DataOriginBadge kind="demo" label="Aportación simulada · no se enviarán datos" className="mb-6" />
+            <DataOriginBadge kind="calculated" label="Borrador local · todavía no enviado" className="mb-6" />
 
             {/* Step progress pills */}
             <div className="flex items-center gap-1.5 mb-6">
@@ -536,7 +642,7 @@ export const ScannerView: React.FC = () => {
                 <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
                   Paso {contributeStep} de 4
                 </span>
-                {contributePhotos[contributeStep] && (
+                {contributeStep <= 3 && contributePhotos[contributeStep as 1 | 2 | 3] && (
                   <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" /> Foto lista
                   </span>
@@ -549,18 +655,23 @@ export const ScannerView: React.FC = () => {
                   <p className="text-xs text-stone-400 mb-4">
                     Captura el envase completo donde se lea claramente el nombre y la marca.
                   </p>
-                  <button
-                    onClick={() => {
-                      setContributePhotos(prev => ({ ...prev, 1: true }));
-                      showToast('Foto frontal guardada', 'success');
-                    }}
-                    className="w-full h-32 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors"
-                  >
-                    <Camera className="w-6 h-6 text-stone-400" />
+                  <label className="relative w-full h-40 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors overflow-hidden cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={event => {
+                        captureContributionPhoto(1, event.target.files?.[0]);
+                        event.target.value = '';
+                      }}
+                    />
+                    {contributePhotos[1] && <img src={contributePhotos[1].previewUrl} alt="Vista previa frontal" className="absolute inset-0 w-full h-full object-cover opacity-60" />}
+                    <Camera className="relative w-6 h-6 text-white" />
                     <span className="text-xs text-stone-300 font-medium">
                       {contributePhotos[1] ? '✓ Foto capturada (Toca para repetir)' : 'Toca para fotografiar frontal'}
                     </span>
-                  </button>
+                  </label>
                 </div>
               )}
 
@@ -570,18 +681,23 @@ export const ScannerView: React.FC = () => {
                   <p className="text-xs text-stone-400 mb-4">
                     Enfoca el listado de ingredientes y alérgenos con buena iluminación.
                   </p>
-                  <button
-                    onClick={() => {
-                      setContributePhotos(prev => ({ ...prev, 2: true }));
-                      showToast('Foto de ingredientes guardada', 'success');
-                    }}
-                    className="w-full h-32 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors"
-                  >
-                    <Camera className="w-6 h-6 text-stone-400" />
+                  <label className="relative w-full h-40 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors overflow-hidden cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={event => {
+                        captureContributionPhoto(2, event.target.files?.[0]);
+                        event.target.value = '';
+                      }}
+                    />
+                    {contributePhotos[2] && <img src={contributePhotos[2].previewUrl} alt="Vista previa de ingredientes" className="absolute inset-0 w-full h-full object-cover opacity-60" />}
+                    <Camera className="relative w-6 h-6 text-white" />
                     <span className="text-xs text-stone-300 font-medium">
                       {contributePhotos[2] ? '✓ Foto capturada (Toca para repetir)' : 'Toca para fotografiar ingredientes'}
                     </span>
-                  </button>
+                  </label>
                 </div>
               )}
 
@@ -591,18 +707,23 @@ export const ScannerView: React.FC = () => {
                   <p className="text-xs text-stone-400 mb-4">
                     Asegura que se lean los valores por 100 g (calorías, azúcares, grasas, fibra, sal).
                   </p>
-                  <button
-                    onClick={() => {
-                      setContributePhotos(prev => ({ ...prev, 3: true }));
-                      showToast('Tabla nutricional guardada', 'success');
-                    }}
-                    className="w-full h-32 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors"
-                  >
-                    <Camera className="w-6 h-6 text-stone-400" />
+                  <label className="relative w-full h-40 rounded-2xl border-2 border-dashed border-stone-700 bg-stone-950 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors overflow-hidden cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="sr-only"
+                      onChange={event => {
+                        captureContributionPhoto(3, event.target.files?.[0]);
+                        event.target.value = '';
+                      }}
+                    />
+                    {contributePhotos[3] && <img src={contributePhotos[3].previewUrl} alt="Vista previa de información nutricional" className="absolute inset-0 w-full h-full object-cover opacity-60" />}
+                    <Camera className="relative w-6 h-6 text-white" />
                     <span className="text-xs text-stone-300 font-medium">
                       {contributePhotos[3] ? '✓ Foto capturada (Toca para repetir)' : 'Toca para fotografiar tabla'}
                     </span>
-                  </button>
+                  </label>
                 </div>
               )}
 
@@ -643,17 +764,19 @@ export const ScannerView: React.FC = () => {
             {contributeStep < 4 ? (
               <button
                 onClick={() => setContributeStep(prev => prev + 1)}
-                className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
+                disabled={!contributePhotos[contributeStep as 1 | 2 | 3]}
+                className="w-full h-12 rounded-2xl bg-emerald-500 disabled:opacity-40 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
               >
                 Continuar
                 <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <button
-                onClick={completeContribution}
-                className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
+                onClick={() => void completeContribution()}
+                disabled={isSavingDraft || Object.keys(contributePhotos).length < 3 || !contributeName.trim()}
+                className="w-full h-12 rounded-2xl bg-emerald-500 disabled:opacity-40 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
               >
-                Simular envío
+                {isSavingDraft ? 'Guardando…' : 'Guardar borrador local'}
                 <CheckCircle2 className="w-4 h-4" />
               </button>
             )}

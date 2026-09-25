@@ -26,6 +26,8 @@ la definición de producto marca la dirección de desarrollo.
   reapertura, comparación y borrado local.
 - [PWA y modo sin conexión](./PWA_AND_OFFLINE.md): instalación, Service Worker,
   cachés y recuperación segura de productos guardados.
+- [Borradores de aportaciones](./CONTRIBUTION_DRAFTS.md): captura fotográfica,
+  almacenamiento local y límites del envío a Open Food Facts.
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

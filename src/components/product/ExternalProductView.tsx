@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Database, Heart, Info, Scale, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Database, Heart, Info, ScanLine, Scale, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { DataOriginBadge } from '../ui/DataOrigin';
@@ -12,6 +12,7 @@ interface ExternalProductViewProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onCompare: () => void;
+  onScanAnother: () => void;
 }
 
 const nutritionLabels: Array<[keyof FoodLensProduct['nutrition'], string, string]> = [
@@ -31,9 +32,15 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
   isFavorite,
   onToggleFavorite,
   onCompare,
+  onScanAnother,
 }) => {
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
   const score = calculateFoodLensScore(product);
+  const assessmentIds = new Set((product.sourceAssessments ?? []).map(item => item.id));
+  const hasNutritionAssessment = assessmentIds.has('nutrition') || Boolean(product.nutriScore);
+  const hasSecondaryAssessment = assessmentIds.has('processing')
+    || assessmentIds.has('additives')
+    || product.nova !== undefined;
   const confidenceLabel = score && (score.confidence >= 70
     ? 'alta'
     : score.confidence >= 40 ? 'media' : 'baja');
@@ -141,7 +148,12 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           <section className="bg-amber-50 rounded-2xl border border-amber-200 p-4 flex gap-3">
             <TriangleAlert className="w-5 h-5 text-amber-700 shrink-0" />
             <div className="text-xs text-amber-950 leading-relaxed">
-              <strong>No hay datos suficientes para calcular una valoración FoodLens.</strong> Se necesita una valoración nutricional y al menos otra dimensión conocida.
+              <strong>No hay datos suficientes para calcular una valoración FoodLens.</strong>{' '}
+              {!hasNutritionAssessment
+                ? 'Falta una valoración Nutri-Score utilizable.'
+                : !hasSecondaryAssessment
+                  ? 'Falta una valoración conocida de NOVA o aditivos.'
+                  : 'La información disponible no alcanza el mínimo de cobertura requerido.'}
             </div>
           </section>
         )}
@@ -205,6 +217,15 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           )}
         </section>
       </main>
+      <footer className="sticky bottom-0 border-t border-stone-200 bg-white/95 p-3 backdrop-blur-md">
+        <button
+          onClick={onScanAnother}
+          className="mx-auto flex h-12 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-extrabold text-white shadow-lg shadow-emerald-700/20"
+        >
+          <ScanLine className="h-5 w-5" />
+          Escanear otro producto
+        </button>
+      </footer>
     </div>
   );
 };

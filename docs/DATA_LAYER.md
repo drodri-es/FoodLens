@@ -29,7 +29,7 @@ sus nombres de campos. Solo reciben el modelo interno `FoodLensProduct`.
 - `normalizeOpenFoodFactsProduct`: traduce el esquema externo sin convertir
   valores ausentes en cero y calcula una indicación inicial de completitud.
 - `ProductRepository`: valida o extrae el código, coordina la consulta y mantiene
-  una caché en memoria de 30 minutos para evitar peticiones repetidas.
+  una caché persistente de 30 minutos para evitar peticiones repetidas.
 - `FoodLensProduct`: contrato interno utilizado por la aplicación.
 
 ## Presentación de productos externos
@@ -43,8 +43,6 @@ dimensiones ausentes.
 
 ## Limitaciones actuales
 
-- La caché es solo de memoria y desaparece al recargar la aplicación.
-- El historial y los favoritos aún utilizan el modelo de demostración.
 - No hay backend propio ni caché compartida en base de datos.
 - La disponibilidad y exactitud de un producto dependen del registro que ofrece
   Open Food Facts en el momento de la consulta.

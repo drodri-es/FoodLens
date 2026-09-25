@@ -34,7 +34,9 @@ conexión. Los productos del historial pueden consultarse offline, conservando l
 fecha original de Open Food Facts. Las respuestas de la API no se cachean en el
 Service Worker para evitar aparentar que datos antiguos son una consulta nueva.
 
-No se almacenan tokens, credenciales ni imágenes capturadas por la cámara.
+No se almacenan tokens ni credenciales. Las fotografías que el usuario captura
+expresamente para aportar un producto ausente se conservan como borrador local
+en IndexedDB y no se envían a servicios externos.
 
 ## Pruebas
 

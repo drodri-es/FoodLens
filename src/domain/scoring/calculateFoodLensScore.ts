@@ -1,6 +1,6 @@
 import { FoodLensProduct } from '../product/FoodLensProduct';
 
-export const FOODLENS_SCORE_VERSION = '0.1.0-experimental';
+export const FOODLENS_SCORE_VERSION = '0.2.0-experimental';
 
 export interface FoodLensScoreDimension {
   id: 'nutrition' | 'ingredients' | 'processing' | 'additives';
@@ -27,10 +27,25 @@ const getLabel = (score: number): FoodLensScoreResult['label'] => {
   return 'Ocasional';
 };
 
+const NUTRI_SCORE_FALLBACK = { a: 100, b: 75, c: 50, d: 25, e: 0 } as const;
+const NOVA_FALLBACK = { 1: 100, 2: 100, 3: 50, 4: 0 } as const;
+
 export function calculateFoodLensScore(product: FoodLensProduct): FoodLensScoreResult | null {
   const assessmentById = new Map((product.sourceAssessments ?? []).map(item => [item.id, item]));
-  const nutrition = assessmentById.get('nutrition');
-  const processing = assessmentById.get('processing');
+  const nutrition = assessmentById.get('nutrition') ?? (product.nutriScore
+    ? {
+        id: 'nutrition' as const,
+        score: NUTRI_SCORE_FALLBACK[product.nutriScore],
+        title: `Conversión ordinal del Nutri-Score ${product.nutriScore.toUpperCase()}`,
+      }
+    : undefined);
+  const processing = assessmentById.get('processing') ?? (product.nova
+    ? {
+        id: 'processing' as const,
+        score: NOVA_FALLBACK[product.nova],
+        title: `Conversión ordinal de NOVA ${product.nova}`,
+      }
+    : undefined);
   const additives = assessmentById.get('additives');
 
   const dimensions: FoodLensScoreDimension[] = [

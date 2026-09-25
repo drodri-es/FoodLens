@@ -1,6 +1,6 @@
 # Metodología de puntuación de FoodLens
 
-**Versión del documento:** 0.2
+**Versión del documento:** 0.3
 **Estado:** algoritmo experimental; no validado para producción
 **Última revisión:** 24 de septiembre de 2026
 
@@ -12,12 +12,25 @@ personalizada de «Encaje contigo».
 
 El catálogo de demostración conserva puntuaciones manuales. Los productos
 consultados por código de barras utilizan, de forma separada, el algoritmo
-experimental `0.1.0-experimental`.
+experimental `0.2.0-experimental`.
 
 Este algoritmo no vuelve a calcular Nutri-Score, NOVA ni la valoración de
 aditivos. Consume los atributos normalizados que Open Food Facts publica con
 estado `known` y un valor `match` entre 0 y 100. De este modo la entrada conserva
 una procedencia identificable y FoodLens se limita a ponderarla.
+
+Cuando esos atributos detallados no están incluidos pero Open Food Facts sí
+publica una clasificación Nutri-Score o NOVA válida, la versión 0.2 aplica una
+conversión ordinal explícita como respaldo. Se identifica como conversión en el
+desglose y nunca sustituye un atributo detallado disponible:
+
+| Clasificación | Conversión |
+| --- | ---: |
+| Nutri-Score A / B / C / D / E | 100 / 75 / 50 / 25 / 0 |
+| NOVA 1 / 2 / 3 / 4 | 100 / 100 / 50 / 0 |
+
+No se deduce una nota de aditivos a partir de una lista vacía, porque una lista
+vacía también puede significar que el registro está incompleto.
 
 ## Modelo experimental implementado
 
