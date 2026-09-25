@@ -12,7 +12,7 @@ personalizada de «Encaje contigo».
 
 El catálogo de demostración conserva puntuaciones manuales. Los productos
 consultados por código de barras utilizan, de forma separada, el algoritmo
-experimental `0.2.0-experimental`.
+experimental `0.2.0`.
 
 Este algoritmo no vuelve a calcular Nutri-Score, NOVA ni la valoración de
 aditivos. Consume los atributos normalizados que Open Food Facts publica con

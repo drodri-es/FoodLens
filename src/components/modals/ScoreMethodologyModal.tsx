@@ -35,7 +35,7 @@ export const ScoreMethodologyModal: React.FC = () => {
           <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-start gap-2.5 text-violet-950">
             <FlaskConical className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
             <p>
-              <strong>Dos modos:</strong> el catálogo contiene puntuaciones ficticias marcadas como demostración. Los productos escaneados usan el cálculo experimental 0.1.0, con entradas normalizadas de Open Food Facts, desglose y nivel de confianza.
+              <strong>Dos modos:</strong> el catálogo contiene puntuaciones ficticias marcadas como demostración. Los productos escaneados usan FoodLens Score 0.2.0, con entradas normalizadas de Open Food Facts, desglose y nivel de confianza.
             </p>
           </div>
 

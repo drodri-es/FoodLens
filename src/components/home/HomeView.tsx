@@ -115,7 +115,7 @@ export const HomeView: React.FC = () => {
                       <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {item.addedAt}</span>
                       <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
                       {score
-                        ? <ScoreBadge score={score.overall} label="Experimental" size="sm" />
+                        ? <ScoreBadge score={score.overall} label={score.label} size="sm" />
                         : <span className="text-[10px] text-stone-500">Datos insuficientes para puntuar</span>}
                     </div>
                     <Heart className="w-4 h-4 text-rose-500 fill-current shrink-0" />
@@ -159,7 +159,7 @@ export const HomeView: React.FC = () => {
                     <span className="text-[10px] text-stone-400">{item.product.brand || 'Marca no disponible'} · {formatScanDate(item.scannedAt)}</span>
                     <h4 className="font-bold text-xs text-stone-900 truncate">{item.product.name}</h4>
                     {score
-                      ? <ScoreBadge score={score.overall} label="Experimental" size="sm" />
+                      ? <ScoreBadge score={score.overall} label={score.label} size="sm" />
                       : <span className="text-[10px] text-stone-500">Datos insuficientes para puntuar</span>}
                   </div>
                   <ChevronRight className="w-4 h-4 text-stone-400" />

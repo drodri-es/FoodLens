@@ -35,6 +35,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
   onScanAnother,
 }) => {
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
+  const displayedCategories = product.categories.slice(-2);
   const score = calculateFoodLensScore(product);
   const assessmentIds = new Set((product.sourceAssessments ?? []).map(item => item.id));
   const hasNutritionAssessment = assessmentIds.has('nutrition') || Boolean(product.nutriScore);
@@ -57,7 +58,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
         </button>
         <div className="min-w-0 flex-1">
           <h1 className="text-sm font-extrabold">Producto consultado</h1>
-          <span className="text-[11px] text-stone-500">Datos reales y valoración experimental</span>
+          <span className="text-[11px] text-stone-500">Datos reales y valoración FoodLens</span>
         </div>
         <button
           onClick={onToggleFavorite}
@@ -99,6 +100,20 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           <p className="text-xs text-stone-500 mt-1">
             {[product.quantity, product.barcode].filter(Boolean).join(' · ')}
           </p>
+          <div className="mt-3 flex items-start gap-2 text-xs">
+            <span className="font-bold text-stone-700">Categoría:</span>
+            {displayedCategories.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {displayedCategories.map(category => (
+                  <span key={category} className="rounded-lg bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800">
+                    {category}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-stone-500">No disponible</span>
+            )}
+          </div>
           <button
             onClick={onCompare}
             className="w-full h-11 mt-4 rounded-2xl bg-stone-900 text-white text-xs font-bold flex items-center justify-center gap-2"
@@ -127,7 +142,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           <section className="bg-white rounded-3xl border border-violet-200 p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-bold text-sm mb-1">FoodLens Score experimental</h3>
+                <h3 className="font-bold text-sm mb-1">FoodLens Score</h3>
                 <p className="text-[11px] text-stone-500">Versión {score.algorithmVersion}</p>
               </div>
               <DataOriginBadge kind="calculated" />

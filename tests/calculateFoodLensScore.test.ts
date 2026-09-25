@@ -53,7 +53,7 @@ test('uses traceable Nutri-Score and NOVA fallbacks when attributes are missing'
 
   assert.ok(result);
   assert.equal(result.overall, 69);
-  assert.equal(result.algorithmVersion, '0.2.0-experimental');
+  assert.equal(result.algorithmVersion, '0.2.0');
   assert.equal(result.dimensions.find(item => item.id === 'nutrition')?.score, 75);
   assert.equal(result.dimensions.find(item => item.id === 'processing')?.score, 50);
   assert.match(

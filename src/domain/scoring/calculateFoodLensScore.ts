@@ -1,6 +1,6 @@
 import { FoodLensProduct } from '../product/FoodLensProduct';
 
-export const FOODLENS_SCORE_VERSION = '0.2.0-experimental';
+export const FOODLENS_SCORE_VERSION = '0.2.0';
 
 export interface FoodLensScoreDimension {
   id: 'nutrition' | 'ingredients' | 'processing' | 'additives';
