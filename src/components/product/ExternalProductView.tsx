@@ -71,6 +71,16 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
         </button>
       </header>
 
+      <div className="sticky top-[65px] z-20 border-b border-stone-200 bg-white/95 px-4 py-3 backdrop-blur-md">
+        <button
+          onClick={onScanAnother}
+          className="mx-auto flex h-11 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-extrabold text-white shadow-md shadow-emerald-700/20"
+        >
+          <ScanLine className="h-5 w-5" />
+          Escanear otro producto
+        </button>
+      </div>
+
       <main className="max-w-md mx-auto p-4 space-y-4">
         <section className="bg-white rounded-3xl border border-stone-200 p-5">
           <DataOriginBadge kind="source" label="Open Food Facts" className="mb-3" />
@@ -217,15 +227,6 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
           )}
         </section>
       </main>
-      <footer className="sticky bottom-0 border-t border-stone-200 bg-white/95 p-3 backdrop-blur-md">
-        <button
-          onClick={onScanAnother}
-          className="mx-auto flex h-12 w-full max-w-md items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-sm font-extrabold text-white shadow-lg shadow-emerald-700/20"
-        >
-          <ScanLine className="h-5 w-5" />
-          Escanear otro producto
-        </button>
-      </footer>
     </div>
   );
 };
