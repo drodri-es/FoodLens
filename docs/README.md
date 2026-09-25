@@ -30,6 +30,8 @@ la definición de producto marca la dirección de desarrollo.
   almacenamiento local y límites del envío a Open Food Facts.
 - [Resumen de producto](./PRODUCT_HIGHLIGHTS.md): reglas neutrales para «Lo
   mejor» y «A tener en cuenta».
+- [Información nutricional](./NUTRITION_DISPLAY.md): alternancia entre valores
+  por 100 g/ml y por ración sin alterar el Score.
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

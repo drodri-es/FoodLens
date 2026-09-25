@@ -41,6 +41,10 @@ publica para Nutri-Score, NOVA y aditivos. El motor experimental puede utilizarl
 como entradas trazables; no reinterpreta los alérgenos ni inventa valores para
 dimensiones ausentes.
 
+La normalización conserva por separado los nutrientes por 100 g/ml y por
+ración. Los valores por ración solo se exponen cuando la fuente los proporciona
+y no intervienen en el cálculo del Score.
+
 ## Limitaciones actuales
 
 - No hay backend propio ni caché compartida en base de datos.

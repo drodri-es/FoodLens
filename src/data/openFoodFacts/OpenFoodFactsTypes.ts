@@ -7,6 +7,14 @@ export interface OpenFoodFactsNutriments {
   fiber_100g?: number;
   proteins_100g?: number;
   salt_100g?: number;
+  'energy-kcal_serving'?: number;
+  fat_serving?: number;
+  'saturated-fat_serving'?: number;
+  carbohydrates_serving?: number;
+  sugars_serving?: number;
+  fiber_serving?: number;
+  proteins_serving?: number;
+  salt_serving?: number;
 }
 
 export interface OpenFoodFactsAttribute {
@@ -27,6 +35,7 @@ export interface OpenFoodFactsProductPayload {
   product_name_es?: string;
   brands?: string;
   quantity?: string;
+  serving_size?: string;
   categories_tags?: string[];
   image_front_url?: string;
   image_front_small_url?: string;

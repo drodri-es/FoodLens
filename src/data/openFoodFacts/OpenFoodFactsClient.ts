@@ -8,6 +8,7 @@ const PRODUCT_FIELDS = [
   'product_name_es',
   'brands',
   'quantity',
+  'serving_size',
   'categories_tags',
   'image_front_url',
   'image_front_small_url',

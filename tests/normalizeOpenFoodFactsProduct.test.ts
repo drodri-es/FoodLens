@@ -7,7 +7,13 @@ test('normalizes source fields without replacing missing values with zero', () =
     code: '3017620422003',
     product_name: 'Example product',
     brands: 'Example brand',
-    nutriments: { sugars_100g: 12.5, proteins_100g: 4 },
+    serving_size: '30 g',
+    nutriments: {
+      sugars_100g: 12.5,
+      proteins_100g: 4,
+      sugars_serving: 3.75,
+      proteins_serving: 1.2,
+    },
     allergens_tags: ['en:milk'],
     nova_group: 4,
     nutriscore_grade: 'D',
@@ -21,6 +27,9 @@ test('normalizes source fields without replacing missing values with zero', () =
   assert.equal(product.barcode, '3017620422003');
   assert.equal(product.nutrition.sugars, 12.5);
   assert.equal(product.nutrition.fiber, undefined);
+  assert.equal(product.servingSize, '30 g');
+  assert.equal(product.nutritionPerServing?.sugars, 3.75);
+  assert.equal(product.nutritionPerServing?.protein, 1.2);
   assert.deepEqual(product.allergens, ['milk']);
   assert.equal(product.nova, 4);
   assert.equal(product.nutriScore, 'd');
@@ -38,4 +47,5 @@ test('uses the fallback barcode and an explicit missing name', () => {
   assert.equal(product.name, 'Producto sin nombre');
   assert.equal(product.completeness, 0);
   assert.deepEqual(product.sourceAssessments, []);
+  assert.equal(product.nutritionPerServing, undefined);
 });

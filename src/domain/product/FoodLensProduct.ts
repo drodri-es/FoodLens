@@ -26,9 +26,11 @@ export interface FoodLensProduct {
   name: string;
   brand?: string;
   quantity?: string;
+  servingSize?: string;
   categories: string[];
   imageUrl?: string;
   nutrition: FoodLensNutrition;
+  nutritionPerServing?: FoodLensNutrition;
   ingredientsText?: string;
   additives: string[];
   allergens: string[];

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, CircleAlert, Database, Heart, Info, ScanLine, Scale, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
@@ -35,7 +35,16 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
   onCompare,
   onScanAnother,
 }) => {
+  const [nutritionMode, setNutritionMode] = useState<'per100' | 'serving'>('per100');
+  const hasServingNutrition = Boolean(
+    product.nutritionPerServing
+    && Object.values(product.nutritionPerServing).some(value => value !== undefined),
+  );
+  const displayedNutrition = nutritionMode === 'serving' && hasServingNutrition
+    ? product.nutritionPerServing!
+    : product.nutrition;
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
+  const displayedNutritionRows = nutritionLabels.filter(([key]) => displayedNutrition[key] !== undefined);
   const displayedCategories = product.categories.slice(-2);
   const score = calculateFoodLensScore(product);
   const highlights = summarizeFoodLensProduct(product);
@@ -223,25 +232,59 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
         </section>
 
         <section className="bg-white rounded-3xl border border-stone-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-sm">Nutrición por 100 g o 100 ml</h3>
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h3 className="font-bold text-sm">Información nutricional</h3>
+              <p className="mt-0.5 text-[11px] text-stone-500">
+                {nutritionMode === 'serving'
+                  ? `Por ración${product.servingSize ? ` (${product.servingSize})` : ''}`
+                  : 'Por 100 g o 100 ml'}
+              </p>
+            </div>
             {product.nutriScore && (
               <span className="text-xs font-bold uppercase bg-stone-100 px-2 py-1 rounded-lg">
                 Nutri-Score {product.nutriScore}
               </span>
             )}
           </div>
-          {availableNutrition.length > 0 ? (
+
+          {hasServingNutrition && (
+            <div className="mb-4 grid grid-cols-2 rounded-xl bg-stone-100 p-1" role="group" aria-label="Unidad de información nutricional">
+              <button
+                onClick={() => setNutritionMode('per100')}
+                aria-pressed={nutritionMode === 'per100'}
+                className={`rounded-lg px-3 py-2 text-[11px] font-bold transition-colors ${
+                  nutritionMode === 'per100' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+                }`}
+              >
+                Por 100 g/ml
+              </button>
+              <button
+                onClick={() => setNutritionMode('serving')}
+                aria-pressed={nutritionMode === 'serving'}
+                className={`rounded-lg px-3 py-2 text-[11px] font-bold transition-colors ${
+                  nutritionMode === 'serving' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+                }`}
+              >
+                Por ración
+              </button>
+            </div>
+          )}
+
+          {displayedNutritionRows.length > 0 ? (
             <dl className="grid grid-cols-2 gap-2">
-              {availableNutrition.map(([key, label, unit]) => (
+              {displayedNutritionRows.map(([key, label, unit]) => (
                 <div key={key} className="rounded-xl bg-stone-50 p-3">
                   <dt className="text-[11px] text-stone-500">{label}</dt>
-                  <dd className="text-sm font-bold tabular-nums">{product.nutrition[key]} {unit}</dd>
+                  <dd className="text-sm font-bold tabular-nums">{displayedNutrition[key]} {unit}</dd>
                 </div>
               ))}
             </dl>
           ) : (
             <p className="text-xs text-stone-500">La fuente no proporciona una tabla nutricional.</p>
+          )}
+          {!hasServingNutrition && availableNutrition.length > 0 && (
+            <p className="mt-3 text-[11px] text-stone-400">Open Food Facts no proporciona valores por ración para este producto.</p>
           )}
           <div className="mt-4"><DataOriginBadge kind="source" /></div>
         </section>

@@ -25,6 +25,17 @@ export function normalizeOpenFoodFactsProduct(
     protein: finiteNumber(nutriments.proteins_100g),
     salt: finiteNumber(nutriments.salt_100g),
   };
+  const nutritionPerServing: FoodLensNutrition = {
+    energyKcal: finiteNumber(nutriments['energy-kcal_serving']),
+    fat: finiteNumber(nutriments.fat_serving),
+    saturatedFat: finiteNumber(nutriments['saturated-fat_serving']),
+    carbohydrates: finiteNumber(nutriments.carbohydrates_serving),
+    sugars: finiteNumber(nutriments.sugars_serving),
+    fiber: finiteNumber(nutriments.fiber_serving),
+    protein: finiteNumber(nutriments.proteins_serving),
+    salt: finiteNumber(nutriments.salt_serving),
+  };
+  const hasServingNutrition = Object.values(nutritionPerServing).some(value => value !== undefined);
 
   const name = payload.product_name_es?.trim() || payload.product_name?.trim() || 'Producto sin nombre';
   const ingredientsText = payload.ingredients_text_es?.trim() || payload.ingredients_text?.trim() || undefined;
@@ -69,9 +80,11 @@ export function normalizeOpenFoodFactsProduct(
     name,
     brand: payload.brands?.trim() || undefined,
     quantity: payload.quantity?.trim() || undefined,
+    servingSize: payload.serving_size?.trim() || undefined,
     categories: (payload.categories_tags ?? []).map(localizedTag),
     imageUrl: payload.image_front_url || payload.image_front_small_url || undefined,
     nutrition,
+    nutritionPerServing: hasServingNutrition ? nutritionPerServing : undefined,
     ingredientsText,
     additives: (payload.additives_tags ?? []).map(localizedTag),
     allergens: (payload.allergens_tags ?? []).map(localizedTag),
