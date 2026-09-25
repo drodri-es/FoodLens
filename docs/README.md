@@ -28,6 +28,8 @@ la definición de producto marca la dirección de desarrollo.
   cachés y recuperación segura de productos guardados.
 - [Borradores de aportaciones](./CONTRIBUTION_DRAFTS.md): captura fotográfica,
   almacenamiento local y límites del envío a Open Food Facts.
+- [Resumen de producto](./PRODUCT_HIGHLIGHTS.md): reglas neutrales para «Lo
+  mejor» y «A tener en cuenta».
 - [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
   configuración de la ruta base.
 

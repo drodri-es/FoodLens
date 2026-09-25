@@ -7,6 +7,8 @@ const auditedFiles = [
   'src/components/assistant/FoodLensAssistantModal.tsx',
   'src/components/basket/BasketView.tsx',
   'src/components/product/ProductDetailView.tsx',
+  'src/components/product/ExternalProductView.tsx',
+  'src/domain/product/summarizeFoodLensProduct.ts',
 ];
 
 const unsupportedLanguage = [

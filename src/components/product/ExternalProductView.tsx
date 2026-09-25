@@ -1,10 +1,11 @@
 import React from 'react';
-import { ArrowLeft, Database, Heart, Info, ScanLine, Scale, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CircleAlert, Database, Heart, Info, ScanLine, Scale, TriangleAlert } from 'lucide-react';
 import { FoodLensProduct } from '../../domain/product/FoodLensProduct';
 import { calculateFoodLensScore } from '../../domain/scoring/calculateFoodLensScore';
 import { DataOriginBadge } from '../ui/DataOrigin';
 import { NovaBadge, NutriScoreBadge, ScoreBadge } from '../ui/ScoreBadges';
 import { NutriScoreGrade } from '../../types/foodlens';
+import { summarizeFoodLensProduct } from '../../domain/product/summarizeFoodLensProduct';
 
 interface ExternalProductViewProps {
   product: FoodLensProduct;
@@ -37,6 +38,7 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
   const availableNutrition = nutritionLabels.filter(([key]) => product.nutrition[key] !== undefined);
   const displayedCategories = product.categories.slice(-2);
   const score = calculateFoodLensScore(product);
+  const highlights = summarizeFoodLensProduct(product);
   const assessmentIds = new Set((product.sourceAssessments ?? []).map(item => item.id));
   const hasNutritionAssessment = assessmentIds.has('nutrition') || Boolean(product.nutriScore);
   const hasSecondaryAssessment = assessmentIds.has('processing')
@@ -182,6 +184,43 @@ export const ExternalProductView: React.FC<ExternalProductViewProps> = ({
             </div>
           </section>
         )}
+
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-extrabold text-emerald-950">
+              <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+              Lo mejor
+            </div>
+            {highlights.best.length > 0 ? (
+              <ul className="space-y-2">
+                {highlights.best.map(item => (
+                  <li key={item.id} className="text-xs leading-relaxed text-emerald-950">✓ {item.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs leading-relaxed text-emerald-900/75">No hay datos suficientes para destacar valores en esta sección.</p>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-extrabold text-amber-950">
+              <CircleAlert className="h-4 w-4 text-amber-700" />
+              A tener en cuenta
+            </div>
+            {highlights.attention.length > 0 ? (
+              <ul className="space-y-2">
+                {highlights.attention.map(item => (
+                  <li key={item.id} className="text-xs leading-relaxed text-amber-950">• {item.text}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs leading-relaxed text-amber-900/75">No hay datos suficientes para destacar valores en esta sección.</p>
+            )}
+          </div>
+          <p className="text-[10px] leading-relaxed text-stone-500 sm:col-span-2">
+            Selección automática de datos declarados. No determina por sí sola la calidad global ni la adecuación del producto.
+          </p>
+        </section>
 
         <section className="bg-white rounded-3xl border border-stone-200 p-5">
           <div className="flex items-center justify-between mb-4">

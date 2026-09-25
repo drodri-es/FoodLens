@@ -9,7 +9,8 @@ clínica previa a un lanzamiento comercial.
 Se han revisado los textos visibles del catálogo ficticio, la ficha de producto,
 la cesta, el asistente simulado y los objetivos personales. Los datos procedentes
 de Open Food Facts se presentan como datos de la fuente; el FoodLens Score se
-identifica como cálculo experimental.
+identifica como cálculo FoodLens, con versión, desglose, confianza y
+limitaciones visibles.
 
 ## Criterios aplicados
 
@@ -36,6 +37,11 @@ digestibilidad, biodisponibilidad, efectos cardiovasculares y seguridad de
 aditivos que no tenían una fuente asociada. Las comparaciones ficticias ya no se
 presentan como evaluación de la dieta real del usuario. El asistente describe
 los valores del fixture y deja explícito que sus respuestas son simuladas.
+
+Los resúmenes «Lo mejor» y «A tener en cuenta» de productos reales seleccionan
+cantidades y clasificaciones conocidas mediante reglas documentadas. No
+atribuyen efectos sobre la salud y no interpretan una lista vacía de aditivos
+como ausencia confirmada sin el atributo correspondiente de Open Food Facts.
 
 ## Fuentes de referencia
 
