@@ -23,6 +23,11 @@ https://drodri-es.github.io/FoodLens/
 GitHub Pages proporciona HTTPS, necesario para solicitar acceso a la cámara en
 navegadores móviles. El usuario debe conceder el permiso explícitamente.
 
+FoodLens muestra su explicación de cámara antes de la primera solicitud y
+guarda localmente que ya fue vista. En aperturas posteriores intenta iniciar el
+lector directamente si el navegador conserva el permiso. Cuando la API de
+permisos está disponible, un permiso bloqueado se distingue de uno pendiente.
+
 ## Desarrollo local
 
 El desarrollo conserva `/` como ruta base:

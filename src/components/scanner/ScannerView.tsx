@@ -4,6 +4,11 @@ import { MOCK_PRODUCTS } from '../../data/mockProducts';
 import { BarcodeScanner, ScannerEngine } from '../../services/scanner/BarcodeScanner';
 import { createBarcodeScanner } from '../../services/scanner/createBarcodeScanner';
 import { DetectionStabilizer } from '../../services/scanner/DetectionStabilizer';
+import {
+  getCameraPermissionState,
+  hasSeenCameraIntro,
+  rememberCameraIntro,
+} from '../../services/scanner/CameraPermissionPreference';
 import { DataOriginBadge } from '../ui/DataOrigin';
 import {
   ContributionDraftPhoto,
@@ -148,6 +153,7 @@ export const ScannerView: React.FC = () => {
       scannerRef.current = scanner;
       await scanner.start(videoRef.current, code => detectedHandlerRef.current(code));
       cameraAuthorizedRef.current = true;
+      rememberCameraIntro();
       setScannerEngine(scanner.engine);
     } catch (error) {
       stopScanner();
@@ -180,10 +186,32 @@ export const ScannerView: React.FC = () => {
       return;
     }
 
-    if (cameraAuthorizedRef.current && hasPermission !== false) {
-      void requestCamera();
-    }
+    let cancelled = false;
+    const prepareCamera = async () => {
+      const permissionState = await getCameraPermissionState();
+      if (cancelled) return;
+
+      if (permissionState === 'denied') {
+        setHasPermission(false);
+        setScannerError('El permiso de cámara está bloqueado en la configuración del navegador.');
+        return;
+      }
+
+      if (cameraAuthorizedRef.current || permissionState === 'granted' || hasSeenCameraIntro()) {
+        void requestCamera();
+      }
+    };
+
+    void prepareCamera();
+    return () => {
+      cancelled = true;
+    };
   }, [isScannerOpen]);
+
+  const handleCameraPermissionRequest = () => {
+    rememberCameraIntro();
+    void requestCamera();
+  };
 
   // Process barcode scan
   const lookupBarcode = async (code: string) => {
@@ -364,7 +392,7 @@ export const ScannerView: React.FC = () => {
             </p>
 
             <button
-              onClick={requestCamera}
+              onClick={handleCameraPermissionRequest}
               className="w-full h-12 rounded-2xl bg-emerald-500 text-stone-950 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-emerald-500/20 mb-3"
             >
               Permitir cámara
@@ -394,8 +422,8 @@ export const ScannerView: React.FC = () => {
           <p className="text-sm text-stone-400 mb-6">{scannerError}</p>
           <button
             onClick={() => {
-              setHasPermission(null);
               setScannerError('');
+              void requestCamera();
             }}
             className="w-full h-12 rounded-2xl bg-stone-800 text-white font-semibold text-sm mb-3"
           >
