@@ -1,49 +1,71 @@
-# Despliegue en GitHub Pages
+# Despliegue en producción
 
-FoodLens se publica como sitio estático mediante
-`.github/workflows/deploy-pages.yml`.
+FoodLens se publica como una imagen Docker en GHCR y se sirve desde el mismo
+VPS que el resto de aplicaciones, detrás de Nginx Proxy Manager.
 
-## Flujo
+La aplicación es una SPA estática. La imagen usa Node únicamente para generar
+el build y Nginx para servir el contenido final por el puerto interno 80.
 
-Cada push a `main`:
+## Archivos de despliegue
 
-1. instala las dependencias con `npm ci`;
-2. genera el build con la ruta base `/FoodLens/`;
-3. sube `dist` como artefacto de GitHub Pages;
-4. despliega el artefacto en el entorno `github-pages`.
+- `Dockerfile`: genera el build y crea la imagen final con Nginx.
+- `nginx.conf`: sirve la SPA y evita cachear los archivos de actualización de
+  la PWA.
+- `docker-compose.yml`: conecta el contenedor `foodlens` a la red externa
+  `proxy-network`.
+- `.github/workflows/release.yml`: publica la imagen y actualiza el VPS al
+  publicar una GitHub Release.
 
-También puede ejecutarse manualmente desde la pestaña Actions.
+## Preparación inicial del VPS
 
-## URL
-
-```text
-https://drodri-es.github.io/FoodLens/
-```
-
-GitHub Pages proporciona HTTPS, necesario para solicitar acceso a la cámara en
-navegadores móviles. El usuario debe conceder el permiso explícitamente.
-
-FoodLens muestra su explicación de cámara antes de la primera solicitud y
-guarda localmente que ya fue vista. En aperturas posteriores intenta iniciar el
-lector directamente si el navegador conserva el permiso. Cuando la API de
-permisos está disponible, un permiso bloqueado se distingue de uno pendiente.
-
-## Desarrollo local
-
-El desarrollo conserva `/` como ruta base:
+En la carpeta elegida para FoodLens, copia `docker-compose.yml` y ejecuta:
 
 ```bash
-npm run dev
+docker compose up -d
 ```
 
-La variable `VITE_BASE_PATH` solo se establece en el workflow de Pages, por lo
-que el despliegue no altera las rutas locales.
+La red externa debe existir previamente:
 
-## Limitaciones
+```bash
+docker network inspect proxy-network
+```
 
-- Pages publica únicamente el frontend estático.
-- Las consultas a Open Food Facts se realizan desde el navegador.
-- No existe todavía backend, sincronización de cuentas ni almacenamiento
-  compartido.
-- La cámara y la linterna deben probarse en dispositivos físicos; su soporte
-  depende del navegador y del hardware.
+## Nginx Proxy Manager
+
+Configura el Proxy Host con estos valores:
+
+- Domain: `foodlens.digitalpartners.es`
+- Scheme: `http`
+- Forward Hostname / IP: `foodlens`
+- Forward Port: `80`
+- SSL: certificado Let's Encrypt y Force SSL
+
+Nginx Proxy Manager también debe estar conectado a `proxy-network`.
+
+## Secrets de GitHub Actions
+
+El repositorio necesita estos secretos:
+
+- `SSH_HOST`
+- `SSH_PORT`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
+- `DEPLOY_PATH`: carpeta del VPS que contiene `docker-compose.yml`
+
+## Publicar
+
+El workflow se activa al publicar una GitHub Release. Construye dos etiquetas
+de la imagen, la versión de la release y `latest`, y después ejecuta en el VPS:
+
+```bash
+docker compose pull foodlens
+docker compose up -d --no-build foodlens
+```
+
+La imagen publicada es:
+
+```text
+ghcr.io/drodri-es/foodlens
+```
+
+El frontend se construye con ruta base `/`, apropiada para el dominio propio.

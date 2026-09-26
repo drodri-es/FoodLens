@@ -1,0 +1,12 @@
+services:
+  foodlens:
+    image: ghcr.io/drodri-es/foodlens:latest
+    container_name: foodlens
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
+
