@@ -47,7 +47,7 @@ Los archivos resultantes tienen funciones distintas:
 
 - `~/.ssh/gh_deploy_foodlens.pub`: clave pública autorizada en el VPS.
 - `~/.ssh/gh_deploy_foodlens`: clave privada almacenada exclusivamente como
-  secreto `SSH_PRIVATE_KEY` en GitHub.
+  secreto `SSH_KEY` en GitHub.
 
 ## 3. Secrets de GitHub Actions
 
@@ -57,7 +57,7 @@ siguientes repository secrets:
 - `SSH_HOST`: dirección del VPS.
 - `SSH_PORT`: puerto del servicio SSH.
 - `SSH_USER`: usuario del VPS autorizado para ejecutar Docker.
-- `SSH_PRIVATE_KEY`: contenido completo de la clave privada dedicada.
+- `SSH_KEY`: contenido completo de la clave privada dedicada.
 - `DEPLOY_PATH`: ruta absoluta de la carpeta de FoodLens en el VPS.
 
 `GITHUB_TOKEN` no se crea manualmente; GitHub Actions lo proporciona durante

@@ -49,7 +49,7 @@ El repositorio necesita estos secretos:
 - `SSH_HOST`
 - `SSH_PORT`
 - `SSH_USER`
-- `SSH_PRIVATE_KEY`
+- `SSH_KEY`: contenido completo de la clave privada dedicada
 - `DEPLOY_PATH`: carpeta del VPS que contiene `docker-compose.yml`
 
 ## Publicar
