@@ -32,8 +32,11 @@ la definición de producto marca la dirección de desarrollo.
   mejor» y «A tener en cuenta».
 - [Información nutricional](./NUTRITION_DISPLAY.md): alternancia entre valores
   por 100 g/ml y por ración sin alterar el Score.
-- [Despliegue](./DEPLOYMENT.md): publicación automática en GitHub Pages y
-  configuración de la ruta base.
+- [Despliegue](./DEPLOYMENT.md): imagen Docker, publicación en GHCR y
+  actualización automática del VPS mediante GitHub Releases.
+- [Preparación manual del despliegue](./MANUAL_DEPLOYMENT_SETUP.md): tareas
+  realizadas en el VPS, Nginx Proxy Manager y GitHub Actions antes de la
+  primera Release.
 
 ## Regla de mantenimiento
 
